@@ -12,8 +12,8 @@ app.use('/api', bankRoutes);
 app.use('/admin', adminRoutes);
 app.use(express.static(path.join(__dirname, '../public')));
 
-app.get('/health', async (_req, res) => {
-  const bankName = await config.getBankName();
+app.get('/health', (_req, res) => {
+  const bankName = config.getBankName();
   res.json({ status: 'ok', bank: bankName });
 });
 
@@ -23,6 +23,16 @@ async function start(): Promise<void> {
   try {
     await AppDataSource.initialize();
     console.log('✅ Database initialized');
+    
+    // Load config from database and cache it
+    try {
+      const ConfigModel = await import('./models/ConfigModel');
+      const dbConfig = await ConfigModel.getAllConfig();
+      const { setDbConfigCache } = await import('./config');
+      setDbConfigCache(dbConfig);
+    } catch (e) {
+      console.warn('[config] Could not load config from database, using env vars');
+    }
   } catch (e: unknown) {
     const error = e instanceof Error ? e.message : String(e);
     if (error.includes('Unknown database')) {
@@ -43,9 +53,9 @@ async function start(): Promise<void> {
     }
     process.exit(1);
   }
-  app.listen(port, '0.0.0.0', async () => {
-    const bankName = await config.getBankName();
-    const bankCode = await config.getBankCode();
+  app.listen(port, '0.0.0.0', () => {
+    const bankName = config.getBankName();
+    const bankCode = config.getBankCode();
     console.log(`\n🏦 ${bankName} (${bankCode}) listening on port ${port}`);
     console.log(`   Bank endpoints: http://localhost:${port}/api/*`);
     console.log(`   Admin UI:       http://localhost:${port}/`);

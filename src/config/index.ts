@@ -1,35 +1,26 @@
 import 'dotenv/config';
-import { AppDataSource } from '../data-source';
-import * as ConfigModel from '../models/ConfigModel';
 
-// Database config loader - loads from DB with env var fallbacks
+// Database config cache - loaded after DB initialization
 let dbConfigCache: Record<string, string> | null = null;
 
-async function loadDbConfig(): Promise<Record<string, string>> {
-  if (dbConfigCache) return dbConfigCache;
-  
-  try {
-    if (AppDataSource.isInitialized) {
-      dbConfigCache = await ConfigModel.getAllConfig();
-      return dbConfigCache;
-    }
-  } catch (e) {
-    console.warn('[config] Database not initialized, using env vars only');
-  }
-  return {};
+export function setDbConfigCache(cache: Record<string, string>): void {
+  dbConfigCache = cache;
 }
 
-async function getConfigValue(key: string, envVar: string | undefined, defaultValue: string): Promise<string> {
-  const dbConfig = await loadDbConfig();
-  return dbConfig[key] || envVar || defaultValue;
+function getDbConfigValue(key: string): string | null {
+  return dbConfigCache?.[key] || null;
 }
 
-// Helper to get key from DB or env/file
+function getConfigValue(key: string, envVar: string | undefined, defaultValue: string): string {
+  return getDbConfigValue(key) || envVar || defaultValue;
+}
+
+// Helper to get key from DB cache, env vars, or files (in that order)
 async function getKeyFromConfig(keyName: string, filePath: string, envKeyVar: string | undefined): Promise<string> {
-  const dbConfig = await loadDbConfig();
-  // Check database first
-  if (dbConfig[keyName]) {
-    return dbConfig[keyName];
+  // Check database cache first (loaded after DB initialization)
+  const dbValue = getDbConfigValue(keyName);
+  if (dbValue) {
+    return dbValue;
   }
   // Then check env var (direct PEM)
   if (envKeyVar) {
@@ -82,15 +73,15 @@ export const config = {
   },
 
   // These will be loaded from database after initialization
-  async getBankCode(): Promise<string> {
+  getBankCode(): string {
     return getConfigValue('bank_code', process.env.BANK_CODE, 'DFC');
   },
 
-  async getBankName(): Promise<string> {
+  getBankName(): string {
     return getConfigValue('bank_name', process.env.BANK_NAME, 'DFC Bank');
   },
 
-  async getConvertorApiUrl(): Promise<string> {
+  getConvertorApiUrl(): string {
     return getConfigValue('convertor_api_url', process.env.CONVERTOR_API_URL, 'http://localhost:4000');
   },
 } as const;
