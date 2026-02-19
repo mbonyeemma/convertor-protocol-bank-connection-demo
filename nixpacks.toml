@@ -1,0 +1,14 @@
+# Railway/Nixpacks configuration for bank-demo
+# Forces npm instead of bun detection
+
+[phases.setup]
+nixPkgs = ["nodejs-20_x"]
+
+[phases.install]
+cmds = ["npm ci --legacy-peer-deps || npm install"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"

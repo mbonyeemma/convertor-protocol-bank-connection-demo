@@ -43,6 +43,11 @@ export function loadPrivateKey(keyPath: string, envVar?: string): string {
   throw new Error(`Private key not found at ${resolved} and BANK_PRIVATE_KEY env var not set`);
 }
 
+export async function loadPrivateKeyAsync(): Promise<string> {
+  const { config } = await import('../config');
+  return config.keys.getBankPrivateKey();
+}
+
 export function loadPublicKey(keyPath: string, envVar?: string): string {
   if (envVar) return envVar;
   const resolved = path.isAbsolute(keyPath) ? keyPath : path.resolve(process.cwd(), keyPath);
@@ -50,6 +55,11 @@ export function loadPublicKey(keyPath: string, envVar?: string): string {
     return fs.readFileSync(resolved, 'utf8');
   }
   throw new Error(`Public key not found at ${resolved} and CONVERTOR_PUBLIC_KEY env var not set`);
+}
+
+export async function loadPublicKeyAsync(): Promise<string> {
+  const { config } = await import('../config');
+  return config.keys.getConvertorPublicKey();
 }
 
 export function generateKeyPair(): { publicKey: string; privateKey: string } {

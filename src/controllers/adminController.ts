@@ -3,6 +3,7 @@ import { AppDataSource } from '../data-source';
 import { Account } from '../entities/Account';
 import { BankTransaction } from '../entities/Transaction';
 import { ConnectionToken } from '../entities/ConnectionToken';
+import * as ConfigModel from '../models/ConfigModel';
 
 const accountRepo = () => AppDataSource.getRepository(Account);
 const txRepo = () => AppDataSource.getRepository(BankTransaction);
@@ -116,5 +117,49 @@ export async function getAccountBalance(req: Request, res: Response): Promise<vo
   } catch (e) {
     console.error('[admin.getAccountBalance]', e);
     res.status(500).json({ error: 'Failed to get account balance' });
+  }
+}
+
+export async function getConfig(_req: Request, res: Response): Promise<void> {
+  try {
+    const config = await ConfigModel.getAllConfig();
+    res.json(config);
+  } catch (e) {
+    console.error('[admin.getConfig]', e);
+    res.status(500).json({ error: 'Failed to get config' });
+  }
+}
+
+export async function updateConfig(req: Request, res: Response): Promise<void> {
+  try {
+    const { key, value, description } = req.body;
+    if (!key || value === undefined) {
+      res.status(400).json({ error: 'key and value are required' });
+      return;
+    }
+    await ConfigModel.setConfig(key, String(value), description);
+    res.json({ key, value, message: 'Config updated successfully' });
+  } catch (e) {
+    console.error('[admin.updateConfig]', e);
+    res.status(500).json({ error: 'Failed to update config' });
+  }
+}
+
+export async function updateKeys(req: Request, res: Response): Promise<void> {
+  try {
+    const { bankPrivateKey, convertorPublicKey } = req.body;
+    
+    if (bankPrivateKey) {
+      await ConfigModel.setConfig('bank_private_key', bankPrivateKey, 'Bank Ed25519 private key (PEM)');
+    }
+    
+    if (convertorPublicKey) {
+      await ConfigModel.setConfig('convertor_public_key', convertorPublicKey, 'Convertor operational public key (PEM)');
+    }
+    
+    res.json({ message: 'Keys updated successfully' });
+  } catch (e) {
+    console.error('[admin.updateKeys]', e);
+    res.status(500).json({ error: 'Failed to update keys' });
   }
 }

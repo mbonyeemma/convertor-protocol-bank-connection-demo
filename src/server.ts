@@ -12,8 +12,9 @@ app.use('/api', bankRoutes);
 app.use('/admin', adminRoutes);
 app.use(express.static(path.join(__dirname, '../public')));
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', bank: config.bankName });
+app.get('/health', async (_req, res) => {
+  const bankName = await config.getBankName();
+  res.json({ status: 'ok', bank: bankName });
 });
 
 const port = config.port;
@@ -42,8 +43,10 @@ async function start(): Promise<void> {
     }
     process.exit(1);
   }
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`\n🏦 ${config.bankName} (${config.bankCode}) listening on port ${port}`);
+  app.listen(port, '0.0.0.0', async () => {
+    const bankName = await config.getBankName();
+    const bankCode = await config.getBankCode();
+    console.log(`\n🏦 ${bankName} (${bankCode}) listening on port ${port}`);
     console.log(`   Bank endpoints: http://localhost:${port}/api/*`);
     console.log(`   Admin UI:       http://localhost:${port}/`);
     console.log(`   Admin API:     http://localhost:${port}/admin/*\n`);

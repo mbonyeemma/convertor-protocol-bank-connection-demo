@@ -4,6 +4,7 @@ import { config } from './config';
 import { Account } from './entities/Account';
 import { ConnectionToken } from './entities/ConnectionToken';
 import { BankTransaction } from './entities/Transaction';
+import { BankConfig } from './entities/Config';
 
 export const AppDataSource = new DataSource({
   type: 'mysql',
@@ -14,6 +15,6 @@ export const AppDataSource = new DataSource({
   database: config.db.database,
   synchronize: config.env === 'development',
   logging: false,
-  entities: [Account, ConnectionToken, BankTransaction],
+  entities: [Account, ConnectionToken, BankTransaction, BankConfig],
   migrations: [],
 });
