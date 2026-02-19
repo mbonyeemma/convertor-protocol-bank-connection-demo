@@ -38,7 +38,9 @@ exports.buildCanonicalString = buildCanonicalString;
 exports.verifySignature = verifySignature;
 exports.sign = sign;
 exports.loadPrivateKey = loadPrivateKey;
+exports.loadPrivateKeyAsync = loadPrivateKeyAsync;
 exports.loadPublicKey = loadPublicKey;
+exports.loadPublicKeyAsync = loadPublicKeyAsync;
 exports.generateKeyPair = generateKeyPair;
 const crypto = __importStar(require("crypto"));
 const fs = __importStar(require("fs"));
@@ -71,6 +73,10 @@ function loadPrivateKey(keyPath, envVar) {
     }
     throw new Error(`Private key not found at ${resolved} and BANK_PRIVATE_KEY env var not set`);
 }
+async function loadPrivateKeyAsync() {
+    const { config } = await Promise.resolve().then(() => __importStar(require('../config')));
+    return config.keys.getBankPrivateKey();
+}
 function loadPublicKey(keyPath, envVar) {
     if (envVar)
         return envVar;
@@ -79,6 +85,10 @@ function loadPublicKey(keyPath, envVar) {
         return fs.readFileSync(resolved, 'utf8');
     }
     throw new Error(`Public key not found at ${resolved} and CONVERTOR_PUBLIC_KEY env var not set`);
+}
+async function loadPublicKeyAsync() {
+    const { config } = await Promise.resolve().then(() => __importStar(require('../config')));
+    return config.keys.getConvertorPublicKey();
 }
 function generateKeyPair() {
     const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {

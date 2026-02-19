@@ -13,5 +13,6 @@ router.get('/connection-tokens', adminController.listConnectionTokens);
 router.get('/config', adminController.getConfig);
 router.post('/config', adminController.updateConfig);
 router.post('/config/keys', adminController.updateKeys);
+router.get('/config/registration', adminController.getRegistrationStatus);
 
 export default router;

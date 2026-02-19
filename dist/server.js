@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -16,13 +49,25 @@ application_1.default.use('/api', bank_1.default);
 application_1.default.use('/admin', admin_1.default);
 application_1.default.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
 application_1.default.get('/health', (_req, res) => {
-    res.json({ status: 'ok', bank: config_1.config.bankName });
+    const bankName = config_1.config.getBankName();
+    res.json({ status: 'ok', bank: bankName });
 });
 const port = config_1.config.port;
 async function start() {
     try {
         await data_source_1.AppDataSource.initialize();
-        console.log('✅ Database initialized');
+        const synchronizeEnabled = data_source_1.AppDataSource.options.synchronize;
+        console.log('✅ Database initialized' + (synchronizeEnabled ? ' (synchronize enabled - tables auto-created)' : ''));
+        // Load config from database and cache it
+        try {
+            const ConfigModel = await Promise.resolve().then(() => __importStar(require('./models/ConfigModel')));
+            const dbConfig = await ConfigModel.getAllConfig();
+            const { setDbConfigCache } = await Promise.resolve().then(() => __importStar(require('./config')));
+            setDbConfigCache(dbConfig);
+        }
+        catch (e) {
+            console.warn('[config] Could not load config from database, using env vars');
+        }
     }
     catch (e) {
         const error = e instanceof Error ? e.message : String(e);
@@ -47,7 +92,9 @@ async function start() {
         process.exit(1);
     }
     application_1.default.listen(port, '0.0.0.0', () => {
-        console.log(`\n🏦 ${config_1.config.bankName} (${config_1.config.bankCode}) listening on port ${port}`);
+        const bankName = config_1.config.getBankName();
+        const bankCode = config_1.config.getBankCode();
+        console.log(`\n🏦 ${bankName} (${bankCode}) listening on port ${port}`);
         console.log(`   Bank endpoints: http://localhost:${port}/api/*`);
         console.log(`   Admin UI:       http://localhost:${port}/`);
         console.log(`   Admin API:     http://localhost:${port}/admin/*\n`);

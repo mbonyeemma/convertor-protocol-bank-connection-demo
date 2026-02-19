@@ -595,6 +595,25 @@
           </form>
         </div>
 
+        <!-- Protocol Registration Status -->
+        <div class="card" id="registrationStatusCard" style="display: none;">
+          <div class="card-header">
+            <h3>Protocol Registration Status</h3>
+          </div>
+          <div id="registrationStatusContent" style="padding: 1rem;">
+            <div id="registrationStatusLoading" style="text-align: center; padding: 1rem;">
+              <small>Loading registration status...</small>
+            </div>
+            <div id="registrationStatusInfo" style="display: none;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <span id="registrationStatusBadge" class="badge"></span>
+                <strong id="registrationStatusText"></strong>
+              </div>
+              <small id="registrationStatusDetails" style="color: var(--text-light);"></small>
+            </div>
+          </div>
+        </div>
+
         <!-- Security Keys -->
         <div class="card">
           <div class="card-header">
@@ -605,14 +624,14 @@
             <div class="form-group form-group-full">
               <label>Bank Private Key (Ed25519 PEM)</label>
               <textarea name="bankPrivateKey" id="bankPrivateKey" rows="6" placeholder="-----BEGIN PRIVATE KEY----&#10;MIGTMBAGByqGSM49AgEGBSuBBAAjBHkwdwIBAQQg...&#10;-----END PRIVATE KEY-----" style="font-family: monospace; font-size: 0.875rem;"></textarea>
-              <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">Paste your bank's Ed25519 private key in PEM format</small>
+              <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">Paste your bank's Ed25519 private key in PEM format. Saving will auto-register with Convertor protocol.</small>
             </div>
             <div class="form-group form-group-full">
               <label>Convertor Public Key (Ed25519 PEM)</label>
               <textarea name="convertorPublicKey" id="convertorPublicKey" rows="6" placeholder="-----BEGIN PUBLIC KEY----&#10;MCowBQYDK2VwAyEA...&#10;-----END PUBLIC KEY-----" style="font-family: monospace; font-size: 0.875rem;"></textarea>
               <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">Paste Convertor protocol's operational public key in PEM format</small>
             </div>
-            <button type="submit" class="btn btn-primary">Save Keys</button>
+            <button type="submit" class="btn btn-primary">Save Keys & Register</button>
           </form>
         </div>
       </div>
@@ -851,8 +870,61 @@
         document.getElementById('convertor_api_url').value = config.convertor_api_url || '';
         document.getElementById('bankPrivateKey').value = config.bank_private_key || '';
         document.getElementById('convertorPublicKey').value = config.convertor_public_key || '';
+        
+        // Load registration status
+        await loadRegistrationStatus();
       } catch (e) {
         console.error('Failed to load settings', e);
+      }
+    }
+
+    async function loadRegistrationStatus() {
+      try {
+        const status = await fetch(`${API_BASE}/admin/config/registration`).then(r => r.json());
+        const card = document.getElementById('registrationStatusCard');
+        const loading = document.getElementById('registrationStatusLoading');
+        const info = document.getElementById('registrationStatusInfo');
+        const badge = document.getElementById('registrationStatusBadge');
+        const text = document.getElementById('registrationStatusText');
+        const details = document.getElementById('registrationStatusDetails');
+        
+        card.style.display = 'block';
+        loading.style.display = 'none';
+        info.style.display = 'block';
+        
+        if (status.registered && status.status) {
+          const statusMap = {
+            'pending': { class: 'badge-warning', label: 'Pending Approval' },
+            'active': { class: 'badge-success', label: 'Registered & Active' },
+            'suspended': { class: 'badge-danger', label: 'Suspended' },
+            'degraded': { class: 'badge-warning', label: 'Degraded' },
+          };
+          
+          const statusInfo = statusMap[status.status] || { class: 'badge-secondary', label: status.status || 'Unknown' };
+          badge.className = `badge ${statusInfo.class}`;
+          badge.textContent = statusInfo.label;
+          text.textContent = `Bank is ${statusInfo.label.toLowerCase()} with Convertor Protocol`;
+          details.textContent = status.registrationId 
+            ? `Registration ID: ${status.registrationId.substring(0, 8)}...`
+            : 'Registration pending admin approval';
+        } else {
+          badge.className = 'badge badge-secondary';
+          badge.textContent = 'Not Registered';
+          text.textContent = 'Bank is not yet registered with Convertor Protocol';
+          details.textContent = 'Save your keys above to automatically register with the protocol';
+        }
+      } catch (e) {
+        console.error('Failed to load registration status', e);
+        const card = document.getElementById('registrationStatusCard');
+        const loading = document.getElementById('registrationStatusLoading');
+        const info = document.getElementById('registrationStatusInfo');
+        card.style.display = 'block';
+        loading.style.display = 'none';
+        info.style.display = 'block';
+        document.getElementById('registrationStatusBadge').className = 'badge badge-secondary';
+        document.getElementById('registrationStatusBadge').textContent = 'Unknown';
+        document.getElementById('registrationStatusText').textContent = 'Unable to load registration status';
+        document.getElementById('registrationStatusDetails').textContent = 'Check your connection and try again';
       }
     }
 
@@ -892,6 +964,11 @@
         convertorPublicKey: formData.get('convertorPublicKey'),
       };
       
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving & Registering...';
+      
       try {
         const res = await fetch(`${API_BASE}/admin/config/keys`, {
           method: 'POST',
@@ -900,14 +977,34 @@
         });
         
         if (res.ok) {
-          alert('Keys saved successfully!');
-          loadSettings();
+          const result = await res.json();
+          let message = 'Keys saved successfully!';
+          
+          if (result.registration) {
+            if (result.registration.status === 'pending') {
+              message += '\n\nBank registered with Convertor Protocol (pending admin approval)';
+            } else if (result.registration.status === 'active') {
+              message += '\n\nBank registered and active with Convertor Protocol!';
+            } else {
+              message += `\n\nRegistration status: ${result.registration.status}`;
+            }
+          } else {
+            message += '\n\nNote: Bank may already be registered or registration is pending';
+          }
+          
+          alert(message);
+          await loadSettings();
+          await loadRegistrationStatus();
         } else {
           const error = await res.json();
           alert(error.error || 'Failed to save keys');
         }
       } catch (e) {
-        alert('Failed to save keys');
+        console.error('Save keys error:', e);
+        alert('Failed to save keys: ' + (e.message || 'Unknown error'));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
       }
     });
 

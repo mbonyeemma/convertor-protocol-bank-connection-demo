@@ -24,18 +24,54 @@ const txRepo = () => data_source_1.AppDataSource.getRepository(Transaction_1.Ban
 async function connectionRequest(req, res) {
     try {
         const { user_id, account_reference } = req.body;
+        console.log('[bank-demo.connectionRequest] Received request', {
+            user_id,
+            account_reference: account_reference ? `${account_reference.slice(0, 4)}****` : 'missing',
+            timestamp: new Date().toISOString(),
+        });
+        if (!account_reference) {
+            console.error('[bank-demo.connectionRequest] Missing account_reference');
+            res.status(400).json({ error: 'account_reference is required' });
+            return;
+        }
+        console.log('[bank-demo.connectionRequest] Looking up account in database', {
+            accountNumber: account_reference,
+        });
         const account = await accountRepo().findOne({ where: { accountNumber: account_reference } });
         if (!account) {
+            console.error('[bank-demo.connectionRequest] Account not found in database', {
+                accountNumber: account_reference,
+                searchedIn: 'accounts table',
+            });
             res.status(404).json({ error: 'Account not found' });
             return;
         }
-        res.json({
-            challenge_type: 'otp',
-            required_metadata: { account_number: account.accountNumber },
+        console.log('[bank-demo.connectionRequest] Account found', {
+            accountId: account.id,
+            accountNumber: account.accountNumber,
+            userName: account.userName,
+            balance: account.balance,
+            currency: account.currency,
         });
+        const response = {
+            challenge_type: 'otp',
+            required_metadata: {
+                account_number: account.accountNumber,
+                account_holder_name: account.userName, // Return real account holder name
+            },
+            account_holder_name: account.userName, // Also at top level for easy access
+        };
+        console.log('[bank-demo.connectionRequest] Sending success response', {
+            accountHolderName: account.userName,
+            challengeType: 'otp',
+        });
+        res.json(response);
     }
     catch (e) {
-        console.error('[connectionRequest]', e);
+        console.error('[bank-demo.connectionRequest] Error processing request', {
+            error: e instanceof Error ? e.message : String(e),
+            stack: e instanceof Error ? e.stack : undefined,
+        });
         res.status(500).json({ error: 'Failed to process connection request' });
     }
 }

@@ -22,7 +22,8 @@ const port = config.port;
 async function start(): Promise<void> {
   try {
     await AppDataSource.initialize();
-    console.log('✅ Database initialized');
+    const synchronizeEnabled = AppDataSource.options.synchronize;
+    console.log('✅ Database initialized' + (synchronizeEnabled ? ' (synchronize enabled - tables auto-created)' : ''));
     
     // Load config from database and cache it
     try {

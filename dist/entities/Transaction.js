@@ -35,7 +35,7 @@ __decorate([
     __metadata("design:type", String)
 ], BankTransaction.prototype, "type", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 36, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'char', length: 36, nullable: true }),
     __metadata("design:type", Object)
 ], BankTransaction.prototype, "accountId", void 0);
 __decorate([

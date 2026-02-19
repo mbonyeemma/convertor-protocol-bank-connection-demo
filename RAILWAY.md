@@ -13,6 +13,9 @@ DB_USER=${{MySQL.MYSQLUSER}}
 DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
 DB_NAME=${{MySQL.MYSQLDATABASE}}
 
+# Enable table auto-creation (required for first deploy)
+DB_SYNCHRONIZE=true
+
 # Optional
 NODE_ENV=production
 PORT=5001

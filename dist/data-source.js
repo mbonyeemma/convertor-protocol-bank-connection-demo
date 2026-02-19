@@ -7,6 +7,9 @@ const config_1 = require("./config");
 const Account_1 = require("./entities/Account");
 const ConnectionToken_1 = require("./entities/ConnectionToken");
 const Transaction_1 = require("./entities/Transaction");
+const Config_1 = require("./entities/Config");
+// Enable synchronize if explicitly set via env var, or in development
+const shouldSynchronize = process.env.DB_SYNCHRONIZE === 'true' || config_1.config.env === 'development';
 exports.AppDataSource = new typeorm_1.DataSource({
     type: 'mysql',
     host: config_1.config.db.host,
@@ -14,9 +17,9 @@ exports.AppDataSource = new typeorm_1.DataSource({
     username: config_1.config.db.user,
     password: config_1.config.db.password,
     database: config_1.config.db.database,
-    synchronize: config_1.config.env === 'development',
+    synchronize: shouldSynchronize,
     logging: false,
-    entities: [Account_1.Account, ConnectionToken_1.ConnectionToken, Transaction_1.BankTransaction],
+    entities: [Account_1.Account, ConnectionToken_1.ConnectionToken, Transaction_1.BankTransaction, Config_1.BankConfig],
     migrations: [],
 });
 //# sourceMappingURL=data-source.js.map

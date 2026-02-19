@@ -3,7 +3,9 @@ export declare function buildCanonicalString(method: string, path: string, bodyS
 export declare function verifySignature(canonicalString: string, signatureBase64: string, publicKeyPem: string): boolean;
 export declare function sign(canonicalString: string, privateKeyPem: string): string;
 export declare function loadPrivateKey(keyPath: string, envVar?: string): string;
+export declare function loadPrivateKeyAsync(): Promise<string>;
 export declare function loadPublicKey(keyPath: string, envVar?: string): string;
+export declare function loadPublicKeyAsync(): Promise<string>;
 export declare function generateKeyPair(): {
     publicKey: string;
     privateKey: string;
