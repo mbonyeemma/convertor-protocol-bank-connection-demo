@@ -29,7 +29,11 @@ export async function connectionRequest(req: Request, res: Response): Promise<vo
     }
     res.json({
       challenge_type: 'otp',
-      required_metadata: { account_number: account.accountNumber },
+      required_metadata: { 
+        account_number: account.accountNumber,
+        account_holder_name: account.userName, // Return real account holder name
+      },
+      account_holder_name: account.userName, // Also at top level for easy access
     });
   } catch (e) {
     console.error('[connectionRequest]', e);
