@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DFC Bank - Admin Portal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #1e40af;
+      --primary-dark: #1e3a8a;
+      --secondary: #64748b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --sidebar-width: 260px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Login Page */
+    #loginPage {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-card {
+      background: white;
+      padding: 3rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-card h1 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .login-card p {
+      color: var(--text-light);
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Main App Layout */
+    #app {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: white;
+      border-right: 1px solid var(--border);
+      padding: 2rem 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 0 2rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .sidebar-header h1 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      color: var(--text-light);
+      font-size: 0.875rem;
+    }
+
+    .nav-menu {
+      list-style: none;
+      padding: 0 1rem;
+    }
+
+    .nav-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .nav-link:hover {
+      background: var(--bg);
+      color: var(--primary);
+    }
+
+    .nav-link.active {
+      background: #eff6ff;
+      color: var(--primary);
+    }
+
+    .nav-link svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h2 {
+      font-size: 2rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+      color: var(--text-light);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h3 {
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group-full {
+      grid-column: 1 / -1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--bg);
+    }
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tbody tr:hover {
+      background: var(--bg);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .balance-card h3 {
+      font-size: 0.875rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .balance-card .amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .balance-card .currency {
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-light);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .logout-btn {
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      width: calc(var(--sidebar-width) - 4rem);
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .logout-btn:hover {
+      background: #fee2e2;
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div id="loginPage">
+    <div class="login-card">
+      <h1>🏦 DFC Bank</h1>
+      <p>Admin Portal</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" value="admin" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" value="admin" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🏦 DFC Bank</h1>
+        <p>Admin Portal</p>
+      </div>
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="#" class="nav-link active" data-page="dashboard">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-page="create-user">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Create User
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-page="accounts">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              View Accounts
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-page="balances">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              View Balances
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-page="connections">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+              Convertor Connections
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <button class="btn logout-btn" id="logoutBtn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        Logout
+      </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Page -->
+      <div id="dashboard" class="page active">
+        <div class="page-header">
+          <h2>Dashboard</h2>
+          <p>Overview of DFC Bank operations</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Quick Stats</h3>
+          </div>
+          <div id="dashboardStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <!-- Stats will be loaded here -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Recent Transactions</h3>
+          </div>
+          <div id="dashboardTransactions">
+            <!-- Transactions will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Create User Page -->
+      <div id="create-user" class="page">
+        <div class="page-header">
+          <h2>Create User</h2>
+          <p>Register a new customer account</p>
+        </div>
+        <div class="card">
+          <form id="createAccountForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>User ID</label>
+                <input type="text" name="userId" placeholder="e.g. emma" required>
+              </div>
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="userName" placeholder="e.g. Emma Wilson" required>
+              </div>
+              <div class="form-group">
+                <label>Account Number</label>
+                <input type="text" name="accountNumber" placeholder="e.g. ACC001" required>
+              </div>
+              <div class="form-group">
+                <label>Initial Balance</label>
+                <input type="number" name="initialBalance" placeholder="0" value="1000000">
+              </div>
+              <div class="form-group">
+                <label>Currency</label>
+                <select name="currency">
+                  <option value="UGX">UGX</option>
+                  <option value="KES">KES</option>
+                  <option value="USD">USD</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Accounts Page -->
+      <div id="accounts" class="page">
+        <div class="page-header">
+          <h2>View Accounts</h2>
+          <p>All customer accounts</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>All Accounts</h3>
+            <button class="btn btn-primary" onclick="loadAccounts()">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Account Number</th>
+                <th>Balance</th>
+                <th>Currency</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="accountsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Balances Page -->
+      <div id="balances" class="page">
+        <div class="page-header">
+          <h2>View Balances</h2>
+          <p>Account balances overview</p>
+        </div>
+        <div id="balancesContainer">
+          <!-- Balance cards will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Convertor Connections Page -->
+      <div id="connections" class="page">
+        <div class="page-header">
+          <h2>Convertor Connections</h2>
+          <p>Manage user connections to Convertor protocol</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Active Connections</h3>
+            <button class="btn btn-primary" onclick="loadConnections()">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Token Hash</th>
+                <th>Scope</th>
+                <th>Status</th>
+                <th>Expires</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="connectionsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let isAuthenticated = localStorage.getItem('dfc_bank_auth') === 'true';
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const username = formData.get('username');
+      const password = formData.get('password');
+      
+      // Simple auth (in production, use proper authentication)
+      if (username === 'admin' && password === 'admin') {
+        localStorage.setItem('dfc_bank_auth', 'true');
+        isAuthenticated = true;
+        showApp();
+      } else {
+        alert('Invalid credentials');
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('dfc_bank_auth');
+      isAuthenticated = false;
+      showLogin();
+    });
+
+    // Navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = e.currentTarget.dataset.page;
+        showPage(page);
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+      });
+    });
+
+    function showLogin() {
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+    }
+
+    function showApp() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      showPage('dashboard');
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      
+      // Load page-specific data
+      if (pageId === 'dashboard') {
+        loadDashboard();
+      } else if (pageId === 'accounts') {
+        loadAccounts();
+      } else if (pageId === 'balances') {
+        loadBalances();
+      } else if (pageId === 'connections') {
+        loadConnections();
+      }
+    }
+
+    // API Functions
+    async function loadDashboard() {
+      try {
+        const [accounts, transactions] = await Promise.all([
+          fetch(`${API_BASE}/admin/accounts`).then(r => r.json()),
+          fetch(`${API_BASE}/admin/transactions`).then(r => r.json())
+        ]);
+
+        const totalAccounts = accounts.length;
+        const totalBalance = accounts.reduce((sum, a) => sum + Number(a.balance), 0);
+        const recentTxs = transactions.slice(0, 5);
+
+        document.getElementById('dashboardStats').innerHTML = `
+          <div style="padding: 1rem; background: #eff6ff; border-radius: 8px;">
+            <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Total Accounts</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #1e40af;">${totalAccounts}</div>
+          </div>
+          <div style="padding: 1rem; background: #f0fdf4; border-radius: 8px;">
+            <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Total Balance</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #10b981;">${totalBalance.toLocaleString()}</div>
+          </div>
+          <div style="padding: 1rem; background: #fef3c7; border-radius: 8px;">
+            <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Recent Transactions</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">${recentTxs.length}</div>
+          </div>
+        `;
+
+        document.getElementById('dashboardTransactions').innerHTML = recentTxs.length > 0 ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recentTxs.map(t => `
+                <tr>
+                  <td>${t.referenceId}</td>
+                  <td><span class="badge badge-info">${t.type}</span></td>
+                  <td>${t.amount ? t.amount.toLocaleString() : '-'}</td>
+                  <td>${t.currency || '-'}</td>
+                  <td>${new Date(t.createdAt).toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        ` : '<div class="empty-state">No transactions yet</div>';
+      } catch (e) {
+        console.error('Failed to load dashboard', e);
+      }
+    }
+
+    async function loadAccounts() {
+      try {
+        const accounts = await fetch(`${API_BASE}/admin/accounts`).then(r => r.json());
+        const tbody = document.getElementById('accountsBody');
+        if (accounts.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No accounts found</td></tr>';
+          return;
+        }
+        tbody.innerHTML = accounts.map(a => `
+          <tr>
+            <td>${a.userId}</td>
+            <td>${a.userName}</td>
+            <td><strong>${a.accountNumber}</strong></td>
+            <td>${Number(a.balance).toLocaleString()}</td>
+            <td>${a.currency}</td>
+            <td>${new Date(a.createdAt).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load accounts', e);
+      }
+    }
+
+    async function loadBalances() {
+      try {
+        const accounts = await fetch(`${API_BASE}/admin/accounts`).then(r => r.json());
+        const container = document.getElementById('balancesContainer');
+        if (accounts.length === 0) {
+          container.innerHTML = '<div class="empty-state">No accounts found</div>';
+          return;
+        }
+        container.innerHTML = accounts.map(a => `
+          <div class="balance-card">
+            <h3>${a.userName} (${a.userId})</h3>
+            <div class="amount">${Number(a.balance).toLocaleString()}</div>
+            <div class="currency">${a.currency}</div>
+            <div style="margin-top: 1rem; font-size: 0.875rem; opacity: 0.8;">Account: ${a.accountNumber}</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load balances', e);
+      }
+    }
+
+    async function loadConnections() {
+      try {
+        const tokens = await fetch(`${API_BASE}/admin/connection-tokens`).then(r => r.json());
+        const tbody = document.getElementById('connectionsBody');
+        if (tokens.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No connections found</td></tr>';
+          return;
+        }
+        tbody.innerHTML = tokens.map(t => `
+          <tr>
+            <td>${t.userId}</td>
+            <td><code style="font-size: 0.75rem;">${t.tokenHash.substring(0, 16)}...</code></td>
+            <td><span class="badge badge-info">${t.scope}</span></td>
+            <td>
+              ${t.isExpired 
+                ? '<span class="badge badge-danger">Expired</span>' 
+                : '<span class="badge badge-success">Active</span>'}
+            </td>
+            <td>${new Date(t.expiresAt).toLocaleString()}</td>
+            <td>${new Date(t.createdAt).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load connections', e);
+      }
+    }
+
+    // Create Account
+    document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      data.initialBalance = parseInt(data.initialBalance) || 0;
+      
+      try {
+        const res = await fetch(`${API_BASE}/admin/accounts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        
+        if (res.ok) {
+          alert('Account created successfully!');
+          e.target.reset();
+          loadAccounts();
+          showPage('accounts');
+        } else {
+          const error = await res.json();
+          alert(error.error || 'Failed to create account');
+        }
+      } catch (e) {
+        alert('Failed to create account');
+      }
+    });
+
+    // Initialize
+    if (isAuthenticated) {
+      showApp();
+    } else {
+      showLogin();
+    }
+  </script>
+</body>
+</html>
