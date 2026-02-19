@@ -110,3 +110,4 @@ To deploy this as a different bank:
 3. Register bank in Convertor Back Office with this bank's public key and baseUrl
 4. Create accounts in bank demo UI
 5. Initiate transfers from Convertor client → bank demo processes them
+# convertor-protocol-bank-connection-demo
