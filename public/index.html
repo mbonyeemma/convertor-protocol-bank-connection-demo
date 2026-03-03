@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DFC Bank - Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -12,107 +15,214 @@
     }
 
     :root {
-      --primary: #1e40af;
-      --primary-dark: #1e3a8a;
-      --secondary: #64748b;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --text-light: #64748b;
+      --bg: hsl(210 20% 98%);
+      --fg: hsl(205 80% 10%);
+      --card: hsl(0 0% 100%);
+      --card-fg: hsl(205 80% 10%);
+      --primary: hsl(210 100% 65%);
+      --primary-fg: hsl(0 0% 100%);
+      --primary-hover: hsl(210 100% 58%);
+      --secondary: hsl(205 80% 21%);
+      --secondary-fg: hsl(0 0% 100%);
+      --muted: hsl(210 15% 93%);
+      --muted-fg: hsl(210 10% 50%);
+      --accent: hsl(190 80% 55%);
+      --border: hsl(210 20% 90%);
+      --input: hsl(210 20% 90%);
+      --success: hsl(152 60% 48%);
+      --success-fg: hsl(0 0% 100%);
+      --danger: hsl(0 84% 60%);
+      --warning: hsl(38 92% 50%);
+      --radius: 0.75rem;
       --sidebar-width: 260px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: var(--fg);
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Login Page */
+    /* ── Login Page ── */
     #loginPage {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: hsl(205 85% 6%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #loginPage::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        radial-gradient(circle at 30% 40%, hsl(210 100% 65% / 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 70% 60%, hsl(190 80% 55% / 0.08) 0%, transparent 50%);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
     }
 
     .login-card {
-      background: white;
-      padding: 3rem;
-      border-radius: 16px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      background: hsl(205 60% 10%);
+      border: 1px solid hsl(205 30% 18%);
+      padding: 2.5rem;
+      border-radius: var(--radius);
+      box-shadow: 0 0 20px hsl(210 100% 65% / 0.08), var(--shadow-lg);
       width: 100%;
       max-width: 400px;
+      position: relative;
+      z-index: 1;
     }
 
-    .login-card h1 {
-      color: var(--primary);
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       margin-bottom: 0.5rem;
-      font-size: 2rem;
     }
 
-    .login-card p {
-      color: var(--text-light);
+    .login-logo .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 16px hsl(210 100% 65% / 0.3);
+    }
+
+    .login-logo h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-card .subtitle {
+      color: hsl(210 15% 55%);
+      font-size: 0.875rem;
       margin-bottom: 2rem;
+      letter-spacing: 0.02em;
     }
 
+    .login-card .form-group label {
+      color: hsl(210 20% 75%);
+    }
+
+    .login-card .form-group input {
+      background: hsl(205 40% 14%);
+      border-color: hsl(205 30% 22%);
+      color: hsl(210 20% 95%);
+    }
+
+    .login-card .form-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px hsl(210 100% 65% / 0.15);
+    }
+
+    .login-card .form-group input::placeholder {
+      color: hsl(210 10% 40%);
+    }
+
+    /* ── Form Elements ── */
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 0.5rem;
-      color: var(--text);
+      margin-bottom: 0.375rem;
+      color: var(--fg);
       font-weight: 500;
+      font-size: 0.875rem;
     }
 
-    .form-group input {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
       width: 100%;
-      padding: 0.75rem;
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.2s;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 2px);
+      font-size: 0.875rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: var(--card);
+      color: var(--fg);
     }
 
-    .form-group input:focus {
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
       outline: none;
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px hsl(210 100% 65% / 0.1);
     }
 
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+
+    /* ── Buttons ── */
     .btn {
-      padding: 0.75rem 1.5rem;
+      padding: 0.625rem 1.25rem;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: calc(var(--radius) - 2px);
+      font-size: 0.875rem;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
       transition: all 0.2s;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
     }
 
     .btn-primary {
-      background: var(--primary);
-      color: white;
-      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: var(--primary-fg);
+      box-shadow: 0 0 12px hsl(210 100% 65% / 0.2);
     }
 
     .btn-primary:hover {
-      background: var(--primary-dark);
+      box-shadow: 0 0 20px hsl(210 100% 65% / 0.35);
       transform: translateY(-1px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    /* Main App Layout */
+    .btn-sm {
+      padding: 0.375rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    /* ── Main App Layout ── */
     #app {
       display: none;
       min-height: 100vh;
@@ -124,231 +234,334 @@
       top: 0;
       width: var(--sidebar-width);
       height: 100vh;
-      background: white;
+      background: var(--card);
       border-right: 1px solid var(--border);
-      padding: 2rem 0;
+      padding: 1.5rem 0;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
     .sidebar-header {
-      padding: 0 2rem;
-      margin-bottom: 2rem;
+      padding: 0 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 1.5rem;
     }
 
-    .sidebar-header h1 {
-      color: var(--primary);
-      font-size: 1.5rem;
-      margin-bottom: 0.25rem;
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
     }
 
-    .sidebar-header p {
-      color: var(--text-light);
-      font-size: 0.875rem;
+    .sidebar-logo .logo-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 0 10px hsl(210 100% 65% / 0.2);
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .sidebar-header .sidebar-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted-fg);
+      margin-top: 0.25rem;
+      padding-left: calc(34px + 0.625rem);
+      letter-spacing: 0.02em;
     }
 
     .nav-menu {
       list-style: none;
-      padding: 0 1rem;
+      padding: 0 0.75rem;
+      flex: 1;
     }
 
     .nav-item {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.125rem;
     }
 
     .nav-link {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      color: var(--text);
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      color: var(--muted-fg);
       text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.2s;
+      border-radius: calc(var(--radius) - 2px);
+      transition: all 0.15s;
       font-weight: 500;
+      font-size: 0.875rem;
     }
 
     .nav-link:hover {
-      background: var(--bg);
-      color: var(--primary);
+      background: var(--muted);
+      color: var(--fg);
     }
 
     .nav-link.active {
-      background: #eff6ff;
+      background: hsl(210 100% 65% / 0.1);
       color: var(--primary);
     }
 
     .nav-link svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
     }
 
     .main-content {
       margin-left: var(--sidebar-width);
-      padding: 2rem;
+      padding: 2rem 2.5rem;
+      max-width: calc(100% - var(--sidebar-width));
     }
 
+    /* ── Page Header ── */
     .page-header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
     }
 
     .page-header h2 {
-      font-size: 2rem;
-      color: var(--text);
-      margin-bottom: 0.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: -0.01em;
     }
 
     .page-header p {
-      color: var(--text-light);
+      color: var(--muted-fg);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
     }
 
+    /* ── Cards ── */
     .card {
-      background: var(--card-bg);
-      border-radius: 12px;
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
       padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.25rem;
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.875rem;
       border-bottom: 1px solid var(--border);
     }
 
     .card-header h3 {
-      font-size: 1.25rem;
-      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--fg);
     }
 
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
     }
 
     .form-group-full {
       grid-column: 1 / -1;
     }
 
+    /* ── Tables ── */
     table {
       width: 100%;
       border-collapse: collapse;
     }
 
     thead {
-      background: var(--bg);
+      background: var(--muted);
     }
 
     th {
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       text-align: left;
       font-weight: 600;
-      color: var(--text);
-      font-size: 0.875rem;
+      color: var(--muted-fg);
+      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     td {
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       border-top: 1px solid var(--border);
-      color: var(--text);
+      color: var(--fg);
+      font-size: 0.875rem;
+    }
+
+    tbody tr {
+      transition: background 0.1s;
     }
 
     tbody tr:hover {
-      background: var(--bg);
+      background: hsl(210 20% 98%);
     }
 
+    /* ── Badges ── */
     .badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.625rem;
       border-radius: 9999px;
-      font-size: 0.75rem;
+      font-size: 0.6875rem;
       font-weight: 600;
+      letter-spacing: 0.01em;
     }
 
     .badge-success {
-      background: #d1fae5;
-      color: #065f46;
+      background: hsl(152 60% 48% / 0.12);
+      color: hsl(152 60% 38%);
     }
 
     .badge-info {
-      background: #dbeafe;
-      color: #1e40af;
+      background: hsl(210 100% 65% / 0.12);
+      color: hsl(210 100% 50%);
     }
 
     .badge-warning {
-      background: #fef3c7;
-      color: #92400e;
+      background: hsl(38 92% 50% / 0.12);
+      color: hsl(38 80% 40%);
     }
 
     .badge-danger {
-      background: #fee2e2;
-      color: #991b1b;
+      background: hsl(0 84% 60% / 0.12);
+      color: hsl(0 70% 50%);
     }
 
+    .badge-secondary {
+      background: var(--muted);
+      color: var(--muted-fg);
+    }
+
+    /* ── Stat Cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      padding: 1.25rem;
+      border-radius: calc(var(--radius) - 2px);
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted-fg);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card .stat-value {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    .stat-card.stat-blue .stat-value { color: var(--primary); }
+    .stat-card.stat-green .stat-value { color: var(--success); }
+    .stat-card.stat-amber .stat-value { color: var(--warning); }
+
+    .stat-card.stat-blue { border-color: hsl(210 100% 65% / 0.2); background: hsl(210 100% 65% / 0.04); }
+    .stat-card.stat-green { border-color: hsl(152 60% 48% / 0.2); background: hsl(152 60% 48% / 0.04); }
+    .stat-card.stat-amber { border-color: hsl(38 92% 50% / 0.2); background: hsl(38 92% 50% / 0.04); }
+
+    /* ── Balance Cards ── */
     .balance-card {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 2rem;
-      border-radius: 12px;
-      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--secondary), hsl(205 60% 16%));
+      color: hsl(0 0% 100%);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      border: 1px solid hsl(205 30% 25%);
+      box-shadow: 0 0 12px hsl(210 100% 65% / 0.06);
     }
 
     .balance-card h3 {
-      font-size: 0.875rem;
-      opacity: 0.9;
+      font-size: 0.75rem;
+      opacity: 0.7;
       margin-bottom: 0.5rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+      font-weight: 500;
     }
 
     .balance-card .amount {
-      font-size: 2.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 2rem;
       font-weight: 700;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.125rem;
     }
 
     .balance-card .currency {
-      font-size: 1rem;
-      opacity: 0.8;
+      font-size: 0.875rem;
+      opacity: 0.6;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: var(--text-light);
-    }
-
-    .empty-state svg {
-      width: 64px;
-      height: 64px;
-      margin-bottom: 1rem;
+    .balance-card .account-info {
+      margin-top: 1rem;
+      font-size: 0.8125rem;
       opacity: 0.5;
     }
 
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted-fg);
+      font-size: 0.875rem;
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 0.75rem;
+      opacity: 0.3;
+    }
+
+    /* ── Logout Button ── */
     .logout-btn {
-      position: fixed;
-      bottom: 2rem;
-      left: 2rem;
-      width: calc(var(--sidebar-width) - 4rem);
+      margin: auto 0.75rem 0.75rem;
+      width: calc(100% - 1.5rem);
       background: var(--bg);
-      color: var(--text);
+      color: var(--muted-fg);
       border: 1px solid var(--border);
+      font-size: 0.8125rem;
     }
 
     .logout-btn:hover {
-      background: #fee2e2;
+      background: hsl(0 84% 60% / 0.08);
       color: var(--danger);
-      border-color: var(--danger);
+      border-color: hsl(0 84% 60% / 0.25);
     }
 
+    /* ── Page Visibility ── */
     .page {
       display: none;
     }
@@ -356,24 +569,227 @@
     .page.active {
       display: block;
     }
+
+    /* ── Textarea ── */
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* ── Hint Text ── */
+    .hint {
+      color: var(--muted-fg);
+      font-size: 0.75rem;
+      margin-top: 0.375rem;
+      display: block;
+      line-height: 1.4;
+    }
+
+    /* ── Code Inline ── */
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.125rem 0.375rem;
+      background: var(--muted);
+      border-radius: 4px;
+      color: var(--fg);
+    }
+
+    /* ── Registration Status ── */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .status-row strong {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* ── Validate & Deposit ── */
+    .validate-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .validate-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .validate-row .btn {
+      margin-bottom: 0;
+      height: 38px;
+      white-space: nowrap;
+    }
+
+    .account-result {
+      margin-top: 1.25rem;
+      padding: 1.25rem;
+      border-radius: calc(var(--radius) - 2px);
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    .account-result.visible {
+      display: block;
+    }
+
+    .account-result.valid {
+      border-color: hsl(152 60% 48% / 0.3);
+      background: hsl(152 60% 48% / 0.04);
+    }
+
+    .account-result.invalid {
+      border-color: hsl(0 84% 60% / 0.3);
+      background: hsl(0 84% 60% / 0.04);
+    }
+
+    .account-result-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .account-result-header .result-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+
+    .account-result.valid .result-icon {
+      background: hsl(152 60% 48% / 0.15);
+      color: hsl(152 60% 38%);
+    }
+
+    .account-result.invalid .result-icon {
+      background: hsl(0 84% 60% / 0.15);
+      color: hsl(0 70% 50%);
+    }
+
+    .account-result-header strong {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .account-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .account-detail-item {
+      padding: 0.625rem;
+      background: var(--card);
+      border-radius: calc(var(--radius) - 4px);
+      border: 1px solid var(--border);
+    }
+
+    .account-detail-item .detail-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--muted-fg);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+    }
+
+    .account-detail-item .detail-value {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .deposit-section {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+
+    .deposit-section.visible {
+      display: block;
+    }
+
+    .deposit-section h4 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--fg);
+    }
+
+    .deposit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .deposit-grid .form-group {
+      margin-bottom: 0;
+    }
+
+    .deposit-grid .btn {
+      height: 38px;
+    }
+
+    .deposit-success {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: calc(var(--radius) - 2px);
+      border: 1px solid hsl(152 60% 48% / 0.3);
+      background: hsl(152 60% 48% / 0.04);
+      display: none;
+      font-size: 0.875rem;
+    }
+
+    .deposit-success.visible {
+      display: block;
+    }
+
+    .deposit-success strong {
+      color: hsl(152 60% 38%);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <!-- Login Page -->
   <div id="loginPage">
     <div class="login-card">
-      <h1>🏦 DFC Bank</h1>
-      <p>Admin Portal</p>
+      <div class="login-logo">
+        <div class="logo-icon">🏦</div>
+        <h1>DFC Bank</h1>
+      </div>
+      <p class="subtitle">Admin Portal</p>
       <form id="loginForm">
         <div class="form-group">
           <label>Username</label>
-          <input type="text" name="username" value="admin" required>
+          <input type="text" name="username" value="admin" placeholder="Enter username" required>
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" name="password" value="admin" required>
+          <input type="password" name="password" value="admin" placeholder="Enter password" required>
         </div>
-        <button type="submit" class="btn btn-primary">Sign In</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
       </form>
     </div>
   </div>
@@ -383,8 +799,11 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1>🏦 DFC Bank</h1>
-        <p>Admin Portal</p>
+        <div class="sidebar-logo">
+          <div class="logo-icon">🏦</div>
+          <h1>DFC Bank</h1>
+        </div>
+        <p class="sidebar-subtitle">Admin Portal</p>
       </div>
       <nav>
         <ul class="nav-menu">
@@ -403,19 +822,25 @@
           <li class="nav-item">
             <a href="#" class="nav-link" data-page="accounts">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-              View Accounts
+              Accounts
             </a>
           </li>
           <li class="nav-item">
             <a href="#" class="nav-link" data-page="balances">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              View Balances
+              Balances
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-page="operations">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+              Operations
             </a>
           </li>
           <li class="nav-item">
             <a href="#" class="nav-link" data-page="connections">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-              Convertor Connections
+              Connections
             </a>
           </li>
           <li class="nav-item">
@@ -427,7 +852,7 @@
         </ul>
       </nav>
       <button class="btn logout-btn" id="logoutBtn">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
         Logout
       </button>
     </aside>
@@ -438,25 +863,21 @@
       <div id="dashboard" class="page active">
         <div class="page-header">
           <h2>Dashboard</h2>
-          <p>Overview of DFC Bank operations</p>
+          <p>Overview of bank operations</p>
         </div>
 
         <div class="card">
           <div class="card-header">
             <h3>Quick Stats</h3>
           </div>
-          <div id="dashboardStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <!-- Stats will be loaded here -->
-          </div>
+          <div id="dashboardStats" class="stats-grid"></div>
         </div>
 
         <div class="card">
           <div class="card-header">
             <h3>Recent Transactions</h3>
           </div>
-          <div id="dashboardTransactions">
-            <!-- Transactions will be loaded here -->
-          </div>
+          <div id="dashboardTransactions"></div>
         </div>
       </div>
 
@@ -502,13 +923,13 @@
       <!-- Accounts Page -->
       <div id="accounts" class="page">
         <div class="page-header">
-          <h2>View Accounts</h2>
-          <p>All customer accounts</p>
+          <h2>Accounts</h2>
+          <p>All registered customer accounts</p>
         </div>
         <div class="card">
           <div class="card-header">
             <h3>All Accounts</h3>
-            <button class="btn btn-primary" onclick="loadAccounts()">Refresh</button>
+            <button class="btn btn-primary btn-sm" onclick="loadAccounts()">Refresh</button>
           </div>
           <table>
             <thead>
@@ -529,24 +950,67 @@
       <!-- Balances Page -->
       <div id="balances" class="page">
         <div class="page-header">
-          <h2>View Balances</h2>
+          <h2>Balances</h2>
           <p>Account balances overview</p>
         </div>
-        <div id="balancesContainer">
-          <!-- Balance cards will be loaded here -->
+        <div id="balancesContainer"></div>
+      </div>
+
+      <!-- Operations Page -->
+      <div id="operations" class="page">
+        <div class="page-header">
+          <h2>Operations</h2>
+          <p>Validate accounts and make deposits</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Validate Account</h3>
+          </div>
+          <div class="validate-row">
+            <div class="form-group">
+              <label>Account Number</label>
+              <input type="text" id="validateAccountNumber" placeholder="e.g. ACC001">
+            </div>
+            <button class="btn btn-primary" onclick="validateAccount()">Validate</button>
+          </div>
+
+          <div id="accountResult" class="account-result">
+            <div class="account-result-header">
+              <div class="result-icon" id="resultIcon"></div>
+              <strong id="resultTitle"></strong>
+            </div>
+            <div id="accountDetails" class="account-detail-grid"></div>
+          </div>
+
+          <div id="depositSection" class="deposit-section">
+            <h4>Make a Deposit</h4>
+            <div class="deposit-grid">
+              <div class="form-group">
+                <label>Amount</label>
+                <input type="number" id="depositAmount" placeholder="Enter amount" min="1">
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="depositDescription" placeholder="e.g. Cash deposit">
+              </div>
+              <button class="btn btn-primary" onclick="makeDeposit()">Deposit</button>
+            </div>
+            <div id="depositResult" class="deposit-success"></div>
+          </div>
         </div>
       </div>
 
       <!-- Convertor Connections Page -->
       <div id="connections" class="page">
         <div class="page-header">
-          <h2>Convertor Connections</h2>
-          <p>Manage user connections to Convertor protocol</p>
+          <h2>Connections</h2>
+          <p>Convertor protocol connections</p>
         </div>
         <div class="card">
           <div class="card-header">
             <h3>Active Connections</h3>
-            <button class="btn btn-primary" onclick="loadConnections()">Refresh</button>
+            <button class="btn btn-primary btn-sm" onclick="loadConnections()">Refresh</button>
           </div>
           <table>
             <thead>
@@ -568,7 +1032,7 @@
       <div id="settings" class="page">
         <div class="page-header">
           <h2>Settings</h2>
-          <p>Configure bank settings and paste keys</p>
+          <p>Bank configuration and security keys</p>
         </div>
 
         <!-- Bank Configuration -->
@@ -598,18 +1062,18 @@
         <!-- Protocol Registration Status -->
         <div class="card" id="registrationStatusCard" style="display: none;">
           <div class="card-header">
-            <h3>Protocol Registration Status</h3>
+            <h3>Protocol Registration</h3>
           </div>
-          <div id="registrationStatusContent" style="padding: 1rem;">
+          <div id="registrationStatusContent" style="padding: 0.5rem 0;">
             <div id="registrationStatusLoading" style="text-align: center; padding: 1rem;">
-              <small>Loading registration status...</small>
+              <small style="color: var(--muted-fg);">Loading registration status...</small>
             </div>
             <div id="registrationStatusInfo" style="display: none;">
-              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <div class="status-row" style="margin-bottom: 0.5rem;">
                 <span id="registrationStatusBadge" class="badge"></span>
                 <strong id="registrationStatusText"></strong>
               </div>
-              <small id="registrationStatusDetails" style="color: var(--text-light);"></small>
+              <small id="registrationStatusDetails" class="hint" style="margin-top: 0;"></small>
             </div>
           </div>
         </div>
@@ -618,18 +1082,18 @@
         <div class="card">
           <div class="card-header">
             <h3>Security Keys</h3>
-            <span class="badge badge-warning">Paste your PEM keys here</span>
+            <span class="badge badge-warning">PEM Format</span>
           </div>
           <form id="keysForm">
             <div class="form-group form-group-full">
               <label>Bank Private Key (Ed25519 PEM)</label>
-              <textarea name="bankPrivateKey" id="bankPrivateKey" rows="6" placeholder="-----BEGIN PRIVATE KEY----&#10;MIGTMBAGByqGSM49AgEGBSuBBAAjBHkwdwIBAQQg...&#10;-----END PRIVATE KEY-----" style="font-family: monospace; font-size: 0.875rem;"></textarea>
-              <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">Paste your bank's Ed25519 private key in PEM format. Saving will auto-register with Convertor protocol.</small>
+              <textarea name="bankPrivateKey" id="bankPrivateKey" rows="5" placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----" style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8125rem;"></textarea>
+              <small class="hint">Paste your bank's Ed25519 private key in PEM format. Saving will auto-register with Convertor protocol.</small>
             </div>
             <div class="form-group form-group-full">
               <label>Convertor Public Key (Ed25519 PEM)</label>
-              <textarea name="convertorPublicKey" id="convertorPublicKey" rows="6" placeholder="-----BEGIN PUBLIC KEY----&#10;MCowBQYDK2VwAyEA...&#10;-----END PUBLIC KEY-----" style="font-family: monospace; font-size: 0.875rem;"></textarea>
-              <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">Paste Convertor protocol's operational public key in PEM format</small>
+              <textarea name="convertorPublicKey" id="convertorPublicKey" rows="5" placeholder="-----BEGIN PUBLIC KEY-----&#10;...&#10;-----END PUBLIC KEY-----" style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8125rem;"></textarea>
+              <small class="hint">Paste Convertor protocol's operational public key in PEM format.</small>
             </div>
             <button type="submit" class="btn btn-primary">Save Keys & Register</button>
           </form>
@@ -642,14 +1106,12 @@
     const API_BASE = window.location.origin;
     let isAuthenticated = localStorage.getItem('dfc_bank_auth') === 'true';
 
-    // Login
     document.getElementById('loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const username = formData.get('username');
       const password = formData.get('password');
-      
-      // Simple auth (in production, use proper authentication)
+
       if (username === 'admin' && password === 'admin') {
         localStorage.setItem('dfc_bank_auth', 'true');
         isAuthenticated = true;
@@ -659,14 +1121,12 @@
       }
     });
 
-    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('dfc_bank_auth');
       isAuthenticated = false;
       showLogin();
     });
 
-    // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -691,22 +1151,14 @@
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
-      
-      // Load page-specific data
-      if (pageId === 'dashboard') {
-        loadDashboard();
-      } else if (pageId === 'accounts') {
-        loadAccounts();
-      } else if (pageId === 'balances') {
-        loadBalances();
-      } else if (pageId === 'connections') {
-        loadConnections();
-      } else if (pageId === 'settings') {
-        loadSettings();
-      }
+
+      if (pageId === 'dashboard') loadDashboard();
+      else if (pageId === 'accounts') loadAccounts();
+      else if (pageId === 'balances') loadBalances();
+      else if (pageId === 'connections') loadConnections();
+      else if (pageId === 'settings') loadSettings();
     }
 
-    // API Functions
     async function loadDashboard() {
       try {
         const [accounts, transactions] = await Promise.all([
@@ -719,17 +1171,17 @@
         const recentTxs = transactions.slice(0, 5);
 
         document.getElementById('dashboardStats').innerHTML = `
-          <div style="padding: 1rem; background: #eff6ff; border-radius: 8px;">
-            <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Total Accounts</div>
-            <div style="font-size: 2rem; font-weight: 700; color: #1e40af;">${totalAccounts}</div>
+          <div class="stat-card stat-blue">
+            <div class="stat-label">Total Accounts</div>
+            <div class="stat-value">${totalAccounts}</div>
           </div>
-          <div style="padding: 1rem; background: #f0fdf4; border-radius: 8px;">
-            <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Total Balance</div>
-            <div style="font-size: 2rem; font-weight: 700; color: #10b981;">${totalBalance.toLocaleString()}</div>
+          <div class="stat-card stat-green">
+            <div class="stat-label">Total Balance</div>
+            <div class="stat-value">${totalBalance.toLocaleString()}</div>
           </div>
-          <div style="padding: 1rem; background: #fef3c7; border-radius: 8px;">
-            <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Recent Transactions</div>
-            <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">${recentTxs.length}</div>
+          <div class="stat-card stat-amber">
+            <div class="stat-label">Recent Transactions</div>
+            <div class="stat-value">${recentTxs.length}</div>
           </div>
         `;
 
@@ -747,7 +1199,7 @@
             <tbody>
               ${recentTxs.map(t => `
                 <tr>
-                  <td>${t.referenceId}</td>
+                  <td><code>${t.referenceId}</code></td>
                   <td><span class="badge badge-info">${t.type}</span></td>
                   <td>${t.amount ? t.amount.toLocaleString() : '-'}</td>
                   <td>${t.currency || '-'}</td>
@@ -798,7 +1250,7 @@
             <h3>${a.userName} (${a.userId})</h3>
             <div class="amount">${Number(a.balance).toLocaleString()}</div>
             <div class="currency">${a.currency}</div>
-            <div style="margin-top: 1rem; font-size: 0.875rem; opacity: 0.8;">Account: ${a.accountNumber}</div>
+            <div class="account-info">Account: ${a.accountNumber}</div>
           </div>
         `).join('');
       } catch (e) {
@@ -817,11 +1269,11 @@
         tbody.innerHTML = tokens.map(t => `
           <tr>
             <td>${t.userId}</td>
-            <td><code style="font-size: 0.75rem;">${t.tokenHash.substring(0, 16)}...</code></td>
+            <td><code>${t.tokenHash.substring(0, 16)}...</code></td>
             <td><span class="badge badge-info">${t.scope}</span></td>
             <td>
-              ${t.isExpired 
-                ? '<span class="badge badge-danger">Expired</span>' 
+              ${t.isExpired
+                ? '<span class="badge badge-danger">Expired</span>'
                 : '<span class="badge badge-success">Active</span>'}
             </td>
             <td>${new Date(t.expiresAt).toLocaleString()}</td>
@@ -833,20 +1285,130 @@
       }
     }
 
-    // Create Account
+    let validatedAccount = null;
+
+    async function validateAccount() {
+      const accountNumber = document.getElementById('validateAccountNumber').value.trim();
+      if (!accountNumber) { alert('Enter an account number'); return; }
+
+      const resultEl = document.getElementById('accountResult');
+      const detailsEl = document.getElementById('accountDetails');
+      const depositSection = document.getElementById('depositSection');
+      const depositResult = document.getElementById('depositResult');
+      const resultIcon = document.getElementById('resultIcon');
+      const resultTitle = document.getElementById('resultTitle');
+
+      resultEl.className = 'account-result';
+      depositSection.className = 'deposit-section';
+      depositResult.className = 'deposit-success';
+      validatedAccount = null;
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/accounts/validate/${encodeURIComponent(accountNumber)}`);
+        const data = await res.json();
+
+        if (res.ok && data.valid) {
+          validatedAccount = data;
+          resultEl.className = 'account-result visible valid';
+          resultIcon.textContent = '✓';
+          resultTitle.textContent = 'Account Found';
+          detailsEl.innerHTML = `
+            <div class="account-detail-item">
+              <div class="detail-label">Account Holder</div>
+              <div class="detail-value">${data.userName}</div>
+            </div>
+            <div class="account-detail-item">
+              <div class="detail-label">User ID</div>
+              <div class="detail-value">${data.userId}</div>
+            </div>
+            <div class="account-detail-item">
+              <div class="detail-label">Account Number</div>
+              <div class="detail-value">${data.accountNumber}</div>
+            </div>
+            <div class="account-detail-item">
+              <div class="detail-label">Balance</div>
+              <div class="detail-value">${Number(data.balance).toLocaleString()} ${data.currency}</div>
+            </div>
+          `;
+          depositSection.className = 'deposit-section visible';
+        } else {
+          resultEl.className = 'account-result visible invalid';
+          resultIcon.textContent = '✕';
+          resultTitle.textContent = 'Account Not Found';
+          detailsEl.innerHTML = `<div style="color: var(--muted-fg); font-size: 0.875rem;">No account matches "${accountNumber}". Check the account number and try again.</div>`;
+        }
+      } catch (e) {
+        console.error('Validate error', e);
+        resultEl.className = 'account-result visible invalid';
+        resultIcon.textContent = '!';
+        resultTitle.textContent = 'Validation Failed';
+        detailsEl.innerHTML = '<div style="color: var(--muted-fg); font-size: 0.875rem;">Could not reach the server. Try again.</div>';
+      }
+    }
+
+    async function makeDeposit() {
+      if (!validatedAccount) { alert('Validate an account first'); return; }
+      const amount = document.getElementById('depositAmount').value;
+      const description = document.getElementById('depositDescription').value.trim();
+
+      if (!amount || Number(amount) <= 0) { alert('Enter a valid amount'); return; }
+
+      const depositResult = document.getElementById('depositResult');
+      depositResult.className = 'deposit-success';
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/accounts/${encodeURIComponent(validatedAccount.accountNumber)}/deposit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: Number(amount), description: description || 'Admin deposit' }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          depositResult.className = 'deposit-success visible';
+          depositResult.innerHTML = `
+            <strong>Deposit Successful</strong>
+            <div style="margin-top: 0.5rem; color: var(--fg);">
+              <strong>${Number(data.depositedAmount).toLocaleString()} ${data.currency}</strong> deposited to <strong>${data.userName}</strong> (${data.accountNumber})
+            </div>
+            <div style="margin-top: 0.375rem; color: var(--muted-fg); font-size: 0.8125rem;">
+              Previous balance: ${Number(data.previousBalance).toLocaleString()} → New balance: ${Number(data.newBalance).toLocaleString()} ${data.currency}
+            </div>
+            <div style="margin-top: 0.25rem; color: var(--muted-fg); font-size: 0.75rem;">
+              Ref: <code>${data.referenceId}</code>
+            </div>
+          `;
+          document.getElementById('depositAmount').value = '';
+          document.getElementById('depositDescription').value = '';
+          validatedAccount.balance = data.newBalance;
+          validateAccount();
+        } else {
+          const error = await res.json();
+          alert(error.error || 'Deposit failed');
+        }
+      } catch (e) {
+        console.error('Deposit error', e);
+        alert('Failed to process deposit');
+      }
+    }
+
+    document.getElementById('validateAccountNumber').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); validateAccount(); }
+    });
+
     document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData);
       data.initialBalance = parseInt(data.initialBalance) || 0;
-      
+
       try {
         const res = await fetch(`${API_BASE}/admin/accounts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
-        
+
         if (res.ok) {
           alert('Account created successfully!');
           e.target.reset();
@@ -861,7 +1423,6 @@
       }
     });
 
-    // Settings
     async function loadSettings() {
       try {
         const config = await fetch(`${API_BASE}/admin/config`).then(r => r.json());
@@ -870,8 +1431,6 @@
         document.getElementById('convertor_api_url').value = config.convertor_api_url || '';
         document.getElementById('bankPrivateKey').value = config.bank_private_key || '';
         document.getElementById('convertorPublicKey').value = config.convertor_public_key || '';
-        
-        // Load registration status
         await loadRegistrationStatus();
       } catch (e) {
         console.error('Failed to load settings', e);
@@ -887,11 +1446,11 @@
         const badge = document.getElementById('registrationStatusBadge');
         const text = document.getElementById('registrationStatusText');
         const details = document.getElementById('registrationStatusDetails');
-        
+
         card.style.display = 'block';
         loading.style.display = 'none';
         info.style.display = 'block';
-        
+
         if (status.registered && status.status) {
           const statusMap = {
             'pending': { class: 'badge-warning', label: 'Pending Approval' },
@@ -899,12 +1458,12 @@
             'suspended': { class: 'badge-danger', label: 'Suspended' },
             'degraded': { class: 'badge-warning', label: 'Degraded' },
           };
-          
+
           const statusInfo = statusMap[status.status] || { class: 'badge-secondary', label: status.status || 'Unknown' };
           badge.className = `badge ${statusInfo.class}`;
           badge.textContent = statusInfo.label;
           text.textContent = `Bank is ${statusInfo.label.toLowerCase()} with Convertor Protocol`;
-          details.textContent = status.registrationId 
+          details.textContent = status.registrationId
             ? `Registration ID: ${status.registrationId.substring(0, 8)}...`
             : 'Registration pending admin approval';
         } else {
@@ -931,7 +1490,7 @@
     document.getElementById('configForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
-      
+
       try {
         const updates = [];
         for (const [key, value] of formData.entries()) {
@@ -940,11 +1499,9 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key, value }),
           });
-          if (res.ok) {
-            updates.push(key);
-          }
+          if (res.ok) updates.push(key);
         }
-        
+
         if (updates.length > 0) {
           alert('Configuration saved successfully!');
           loadSettings();
@@ -963,23 +1520,23 @@
         bankPrivateKey: formData.get('bankPrivateKey'),
         convertorPublicKey: formData.get('convertorPublicKey'),
       };
-      
+
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Saving & Registering...';
-      
+
       try {
         const res = await fetch(`${API_BASE}/admin/config/keys`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
-        
+
         if (res.ok) {
           const result = await res.json();
           let message = 'Keys saved successfully!';
-          
+
           if (result.registration) {
             if (result.registration.status === 'pending') {
               message += '\n\nBank registered with Convertor Protocol (pending admin approval)';
@@ -991,7 +1548,7 @@
           } else {
             message += '\n\nNote: Bank may already be registered or registration is pending';
           }
-          
+
           alert(message);
           await loadSettings();
           await loadRegistrationStatus();
@@ -1008,7 +1565,6 @@
       }
     });
 
-    // Initialize
     if (isAuthenticated) {
       showApp();
     } else {

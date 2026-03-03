@@ -279,6 +279,80 @@ export async function updateKeys(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function validateAccount(req: Request, res: Response): Promise<void> {
+  try {
+    const { accountNumber } = req.params;
+    if (!accountNumber) {
+      res.status(400).json({ error: 'accountNumber is required' });
+      return;
+    }
+    const account = await accountRepo().findOne({ where: { accountNumber } });
+    if (!account) {
+      res.status(404).json({ valid: false, error: 'Account not found' });
+      return;
+    }
+    res.json({
+      valid: true,
+      accountNumber: account.accountNumber,
+      userName: account.userName,
+      userId: account.userId,
+      currency: account.currency,
+      balance: Number(account.balance),
+    });
+  } catch (e) {
+    console.error('[admin.validateAccount]', e);
+    res.status(500).json({ error: 'Failed to validate account' });
+  }
+}
+
+export async function depositToAccount(req: Request, res: Response): Promise<void> {
+  try {
+    const { accountNumber } = req.params;
+    const { amount, description } = req.body;
+
+    if (!accountNumber || !amount || Number(amount) <= 0) {
+      res.status(400).json({ error: 'Valid accountNumber and positive amount are required' });
+      return;
+    }
+
+    const account = await accountRepo().findOne({ where: { accountNumber } });
+    if (!account) {
+      res.status(404).json({ error: 'Account not found' });
+      return;
+    }
+
+    const depositAmount = Math.floor(Number(amount));
+    const previousBalance = Number(account.balance);
+    account.balance = String(previousBalance + depositAmount);
+    await accountRepo().save(account);
+
+    const referenceId = `DEP-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    const tx = txRepo().create({
+      referenceId,
+      type: 'deposit',
+      accountId: account.id,
+      amount: String(depositAmount),
+      currency: account.currency,
+      payload: JSON.stringify({ description: description || 'Admin deposit', source: 'admin' }),
+    });
+    await txRepo().save(tx);
+
+    res.json({
+      success: true,
+      referenceId,
+      accountNumber: account.accountNumber,
+      userName: account.userName,
+      depositedAmount: depositAmount,
+      previousBalance,
+      newBalance: Number(account.balance),
+      currency: account.currency,
+    });
+  } catch (e) {
+    console.error('[admin.depositToAccount]', e);
+    res.status(500).json({ error: 'Failed to process deposit' });
+  }
+}
+
 export async function getRegistrationStatus(req: Request, res: Response): Promise<void> {
   try {
     const registrationId = await ConfigModel.getConfig('protocol_registration_id');

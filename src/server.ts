@@ -12,9 +12,24 @@ app.use('/api', bankRoutes);
 app.use('/admin', adminRoutes);
 app.use(express.static(path.join(__dirname, '../public')));
 
-app.get('/health', (_req, res) => {
+app.get('/health', async (_req, res) => {
   const bankName = config.getBankName();
-  res.json({ status: 'ok', bank: bankName });
+  const bankCode = config.getBankCode();
+  let dbHealthy = false;
+  try {
+    await AppDataSource.query('SELECT 1');
+    dbHealthy = true;
+  } catch (_) {}
+
+  const status = dbHealthy ? 'ok' : 'degraded';
+  res.status(dbHealthy ? 200 : 503).json({
+    status,
+    bank: bankName,
+    bankCode,
+    database: dbHealthy ? 'connected' : 'disconnected',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 const port = config.port;

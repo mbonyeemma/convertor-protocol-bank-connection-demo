@@ -56,24 +56,3 @@ export function requireConvertorSignature(req: Request, res: Response, next: Nex
   next();
 }
 
-export function rawBodyJson(): (req: Request, res: Response, next: NextFunction) => void {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const chunks: Buffer[] = [];
-    req.on('data', (chunk: Buffer) => chunks.push(chunk));
-    req.on('end', () => {
-      const raw = Buffer.concat(chunks);
-      (req as Request & { rawBody?: Buffer }).rawBody = raw;
-      if (raw.length) {
-        try {
-          (req as Request).body = JSON.parse(raw.toString('utf8'));
-        } catch {
-          (req as Request).body = {};
-        }
-      } else {
-        (req as Request).body = {};
-      }
-      next();
-    });
-    req.on('error', next);
-  };
-}
