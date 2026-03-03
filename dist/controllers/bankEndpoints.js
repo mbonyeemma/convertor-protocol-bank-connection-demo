@@ -97,13 +97,19 @@ async function authChallengeResponse(req, res) {
             expiresAt,
         });
         await tokenRepo().save(tokenEntity);
-        const privateKey = getBankPrivateKey();
-        const signature = (0, crypto_1.sign)(JSON.stringify({ token, expiresAt: expiresAt.toISOString() }), privateKey);
+        let bankSignature;
+        try {
+            const privateKey = getBankPrivateKey();
+            bankSignature = (0, crypto_1.sign)(JSON.stringify({ token, expiresAt: expiresAt.toISOString() }), privateKey);
+        }
+        catch {
+            // Signing key not configured
+        }
         res.json({
             connection_token: token,
             expiry_timestamp: expiresAt.getTime(),
             scope: 'debit-enabled',
-            bank_signature: signature,
+            ...(bankSignature ? { bank_signature: bankSignature } : {}),
         });
     }
     catch (e) {
@@ -179,8 +185,14 @@ async function debitRequest(req, res) {
             account_hash: (0, crypto_1.sha256Hex)(account.accountNumber),
             timestamp: Date.now(),
         };
-        const privateKey = getBankPrivateKey();
-        const bankSignature = (0, crypto_1.sign)(JSON.stringify(debitProof), privateKey);
+        let bankSignature;
+        try {
+            const privateKey = getBankPrivateKey();
+            bankSignature = (0, crypto_1.sign)(JSON.stringify(debitProof), privateKey);
+        }
+        catch {
+            // Signing key not configured
+        }
         await txRepo().save(txRepo().create({
             referenceId: reference_id,
             type: 'DEBIT',
@@ -192,7 +204,7 @@ async function debitRequest(req, res) {
         res.json({
             debit_proof: {
                 ...debitProof,
-                bank_signature: bankSignature,
+                ...(bankSignature ? { bank_signature: bankSignature } : {}),
             },
         });
     }
@@ -218,8 +230,14 @@ async function creditRequest(req, res) {
             beneficiary_hash: (0, crypto_1.sha256Hex)(account.accountNumber),
             timestamp: Date.now(),
         };
-        const privateKey = getBankPrivateKey();
-        const bankSignature = (0, crypto_1.sign)(JSON.stringify(creditConfirmation), privateKey);
+        let bankSignature;
+        try {
+            const privateKey = getBankPrivateKey();
+            bankSignature = (0, crypto_1.sign)(JSON.stringify(creditConfirmation), privateKey);
+        }
+        catch {
+            // Signing key not configured
+        }
         await txRepo().save(txRepo().create({
             referenceId: reference_id,
             type: 'CREDIT',
@@ -231,7 +249,7 @@ async function creditRequest(req, res) {
         res.json({
             credit_confirmation: {
                 ...creditConfirmation,
-                bank_signature: bankSignature,
+                ...(bankSignature ? { bank_signature: bankSignature } : {}),
             },
         });
     }
@@ -277,8 +295,14 @@ async function reversalRequest(req, res) {
             reversed_amount: debitTx.amount,
             timestamp: Date.now(),
         };
-        const privateKey = getBankPrivateKey();
-        const bankSignature = (0, crypto_1.sign)(JSON.stringify(reversalConfirmation), privateKey);
+        let bankSignature;
+        try {
+            const privateKey = getBankPrivateKey();
+            bankSignature = (0, crypto_1.sign)(JSON.stringify(reversalConfirmation), privateKey);
+        }
+        catch {
+            // Signing key not configured
+        }
         await txRepo().save(txRepo().create({
             referenceId: reference_id,
             type: 'REVERSAL',
@@ -290,7 +314,7 @@ async function reversalRequest(req, res) {
         res.json({
             reversal_confirmation: {
                 ...reversalConfirmation,
-                bank_signature: bankSignature,
+                ...(bankSignature ? { bank_signature: bankSignature } : {}),
             },
         });
     }
@@ -333,18 +357,23 @@ async function verifyAccount(req, res) {
             res.status(404).json({ error: 'Account not found' });
             return;
         }
-        // Sign response with bank's private key
         const response = {
             account_holder_name: account.userName,
             account_number: account.accountNumber,
             verified: true,
         };
-        const privateKey = getBankPrivateKey();
-        const bankSignature = (0, crypto_1.sign)(JSON.stringify(response), privateKey);
-        res.json({
-            ...response,
-            bank_signature: bankSignature,
-        });
+        try {
+            const privateKey = getBankPrivateKey();
+            response.bank_signature = (0, crypto_1.sign)(JSON.stringify({
+                account_holder_name: response.account_holder_name,
+                account_number: response.account_number,
+                verified: response.verified,
+            }), privateKey);
+        }
+        catch {
+            // Signing key not configured — return response without signature
+        }
+        res.json(response);
     }
     catch (e) {
         console.error('[verifyAccount]', e);
