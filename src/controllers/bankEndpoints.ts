@@ -303,3 +303,40 @@ export async function reversalRequest(req: Request, res: Response): Promise<void
     res.status(500).json({ error: 'Failed to process reversal' });
   }
 }
+
+/** POST /verify-account - Verify account number and return account holder name */
+export async function verifyAccount(req: Request, res: Response): Promise<void> {
+  try {
+    const { account_reference } = req.body;
+    
+    if (!account_reference) {
+      res.status(400).json({ error: 'account_reference is required' });
+      return;
+    }
+
+    const account = await accountRepo().findOne({ where: { accountNumber: account_reference } });
+    
+    if (!account) {
+      res.status(404).json({ error: 'Account not found' });
+      return;
+    }
+
+    // Sign response with bank's private key
+    const response = {
+      account_holder_name: account.userName,
+      account_number: account.accountNumber,
+      verified: true,
+    };
+    
+    const privateKey = getBankPrivateKey();
+    const bankSignature = sign(JSON.stringify(response), privateKey);
+    
+    res.json({
+      ...response,
+      bank_signature: bankSignature,
+    });
+  } catch (e) {
+    console.error('[verifyAccount]', e);
+    res.status(500).json({ error: 'Failed to verify account' });
+  }
+}
