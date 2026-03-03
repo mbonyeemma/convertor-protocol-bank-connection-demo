@@ -14,10 +14,6 @@ const Account_1 = require("../entities/Account");
 const ConnectionToken_1 = require("../entities/ConnectionToken");
 const Transaction_1 = require("../entities/Transaction");
 const crypto_1 = require("../lib/crypto");
-const config_1 = require("../config");
-function getBankPrivateKey() {
-    return (0, crypto_1.loadPrivateKey)(config_1.config.keys.bankPrivateKeyPath, config_1.config.keys.bankPrivateKey || undefined);
-}
 const uuid_1 = require("uuid");
 const accountRepo = () => data_source_1.AppDataSource.getRepository(Account_1.Account);
 const tokenRepo = () => data_source_1.AppDataSource.getRepository(ConnectionToken_1.ConnectionToken);
@@ -32,19 +28,11 @@ async function connectionRequest(req, res) {
             timestamp: new Date().toISOString(),
         });
         if (!account_reference) {
-            console.error('[bank-demo.connectionRequest] Missing account_reference');
             res.status(400).json({ error: 'account_reference is required' });
             return;
         }
-        console.log('[bank-demo.connectionRequest] Looking up account in database', {
-            accountNumber: account_reference,
-        });
         const account = await accountRepo().findOne({ where: { accountNumber: account_reference } });
         if (!account) {
-            console.error('[bank-demo.connectionRequest] Account not found in database', {
-                accountNumber: account_reference,
-                searchedIn: 'accounts table',
-            });
             res.status(404).json({ error: 'Account not found' });
             return;
         }
@@ -52,28 +40,18 @@ async function connectionRequest(req, res) {
             accountId: account.id,
             accountNumber: account.accountNumber,
             userName: account.userName,
-            balance: account.balance,
-            currency: account.currency,
         });
-        const response = {
+        res.json({
             challenge_type: 'otp',
             required_metadata: {
                 account_number: account.accountNumber,
-                account_holder_name: account.userName, // Return real account holder name
+                account_holder_name: account.userName,
             },
-            account_holder_name: account.userName, // Also at top level for easy access
-        };
-        console.log('[bank-demo.connectionRequest] Sending success response', {
-            accountHolderName: account.userName,
-            challengeType: 'otp',
+            account_holder_name: account.userName,
         });
-        res.json(response);
     }
     catch (e) {
-        console.error('[bank-demo.connectionRequest] Error processing request', {
-            error: e instanceof Error ? e.message : String(e),
-            stack: e instanceof Error ? e.stack : undefined,
-        });
+        console.error('[connectionRequest]', e);
         res.status(500).json({ error: 'Failed to process connection request' });
     }
 }
@@ -97,19 +75,10 @@ async function authChallengeResponse(req, res) {
             expiresAt,
         });
         await tokenRepo().save(tokenEntity);
-        let bankSignature;
-        try {
-            const privateKey = getBankPrivateKey();
-            bankSignature = (0, crypto_1.sign)(JSON.stringify({ token, expiresAt: expiresAt.toISOString() }), privateKey);
-        }
-        catch {
-            // Signing key not configured
-        }
         res.json({
             connection_token: token,
             expiry_timestamp: expiresAt.getTime(),
             scope: 'debit-enabled',
-            ...(bankSignature ? { bank_signature: bankSignature } : {}),
         });
     }
     catch (e) {
@@ -144,7 +113,7 @@ async function accountBalance(req, res) {
 /** POST /debit-request - Lock then debit funds */
 async function debitRequest(req, res) {
     try {
-        const { reference_id, lock_confirmation_id, amount, connection_token_hash, idempotency_key, phase } = req.body;
+        const { reference_id, lock_confirmation_id, amount, connection_token_hash, phase } = req.body;
         const token = await tokenRepo().findOne({ where: { tokenHash: connection_token_hash } });
         if (!token || new Date() > token.expiresAt) {
             res.status(401).json({ error: 'Invalid or expired token' });
@@ -185,28 +154,15 @@ async function debitRequest(req, res) {
             account_hash: (0, crypto_1.sha256Hex)(account.accountNumber),
             timestamp: Date.now(),
         };
-        let bankSignature;
-        try {
-            const privateKey = getBankPrivateKey();
-            bankSignature = (0, crypto_1.sign)(JSON.stringify(debitProof), privateKey);
-        }
-        catch {
-            // Signing key not configured
-        }
         await txRepo().save(txRepo().create({
             referenceId: reference_id,
             type: 'DEBIT',
             accountId: account.id,
             amount: String(amountValue),
             currency: amount.currency || account.currency,
-            payload: JSON.stringify({ debitProof, bankSignature }),
+            payload: JSON.stringify({ debitProof }),
         }));
-        res.json({
-            debit_proof: {
-                ...debitProof,
-                ...(bankSignature ? { bank_signature: bankSignature } : {}),
-            },
-        });
+        res.json({ debit_proof: debitProof });
     }
     catch (e) {
         console.error('[debitRequest]', e);
@@ -216,7 +172,7 @@ async function debitRequest(req, res) {
 /** POST /credit-request - Credit funds to beneficiary */
 async function creditRequest(req, res) {
     try {
-        const { reference_id, amount, beneficiary_reference, debit_proof_hash, idempotency_key } = req.body;
+        const { reference_id, amount, beneficiary_reference } = req.body;
         const account = await accountRepo().findOne({ where: { accountNumber: beneficiary_reference } });
         if (!account) {
             res.status(404).json({ error: 'Beneficiary account not found' });
@@ -230,28 +186,15 @@ async function creditRequest(req, res) {
             beneficiary_hash: (0, crypto_1.sha256Hex)(account.accountNumber),
             timestamp: Date.now(),
         };
-        let bankSignature;
-        try {
-            const privateKey = getBankPrivateKey();
-            bankSignature = (0, crypto_1.sign)(JSON.stringify(creditConfirmation), privateKey);
-        }
-        catch {
-            // Signing key not configured
-        }
         await txRepo().save(txRepo().create({
             referenceId: reference_id,
             type: 'CREDIT',
             accountId: account.id,
             amount: String(amountValue),
             currency: amount.currency || account.currency,
-            payload: JSON.stringify({ creditConfirmation, bankSignature }),
+            payload: JSON.stringify({ creditConfirmation }),
         }));
-        res.json({
-            credit_confirmation: {
-                ...creditConfirmation,
-                ...(bankSignature ? { bank_signature: bankSignature } : {}),
-            },
-        });
+        res.json({ credit_confirmation: creditConfirmation });
     }
     catch (e) {
         console.error('[creditRequest]', e);
@@ -277,7 +220,7 @@ async function transactionStatus(req, res) {
 /** POST /reversal-request - Reverse a debit */
 async function reversalRequest(req, res) {
     try {
-        const { reference_id, debit_proof, idempotency_key } = req.body;
+        const { reference_id } = req.body;
         const debitTx = await txRepo().findOne({ where: { referenceId: reference_id, type: 'DEBIT' } });
         if (!debitTx) {
             res.status(404).json({ error: 'Debit transaction not found' });
@@ -295,28 +238,15 @@ async function reversalRequest(req, res) {
             reversed_amount: debitTx.amount,
             timestamp: Date.now(),
         };
-        let bankSignature;
-        try {
-            const privateKey = getBankPrivateKey();
-            bankSignature = (0, crypto_1.sign)(JSON.stringify(reversalConfirmation), privateKey);
-        }
-        catch {
-            // Signing key not configured
-        }
         await txRepo().save(txRepo().create({
             referenceId: reference_id,
             type: 'REVERSAL',
             accountId: account.id,
             amount: debitTx.amount,
             currency: debitTx.currency,
-            payload: JSON.stringify({ reversalConfirmation, bankSignature }),
+            payload: JSON.stringify({ reversalConfirmation }),
         }));
-        res.json({
-            reversal_confirmation: {
-                ...reversalConfirmation,
-                ...(bankSignature ? { bank_signature: bankSignature } : {}),
-            },
-        });
+        res.json({ reversal_confirmation: reversalConfirmation });
     }
     catch (e) {
         console.error('[reversalRequest]', e);
@@ -357,23 +287,11 @@ async function verifyAccount(req, res) {
             res.status(404).json({ error: 'Account not found' });
             return;
         }
-        const response = {
+        res.json({
             account_holder_name: account.userName,
             account_number: account.accountNumber,
             verified: true,
-        };
-        try {
-            const privateKey = getBankPrivateKey();
-            response.bank_signature = (0, crypto_1.sign)(JSON.stringify({
-                account_holder_name: response.account_holder_name,
-                account_number: response.account_number,
-                verified: response.verified,
-            }), privateKey);
-        }
-        catch {
-            // Signing key not configured — return response without signature
-        }
-        res.json(response);
+        });
     }
     catch (e) {
         console.error('[verifyAccount]', e);

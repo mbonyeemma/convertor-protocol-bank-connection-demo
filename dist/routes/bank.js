@@ -34,17 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const signature_1 = require("../middleware/signature");
 const bankEndpoints = __importStar(require("../controllers/bankEndpoints"));
 const router = (0, express_1.Router)();
-router.post('/connection-request', signature_1.requireConvertorSignature, bankEndpoints.connectionRequest);
-router.post('/auth-challenge-response', signature_1.requireConvertorSignature, bankEndpoints.authChallengeResponse);
-router.get('/account-balance', signature_1.requireConvertorSignature, bankEndpoints.accountBalance);
-router.post('/debit-request', signature_1.requireConvertorSignature, bankEndpoints.debitRequest);
-router.post('/credit-request', signature_1.requireConvertorSignature, bankEndpoints.creditRequest);
-router.post('/transaction-status', signature_1.requireConvertorSignature, bankEndpoints.transactionStatus);
-router.post('/reversal-request', signature_1.requireConvertorSignature, bankEndpoints.reversalRequest);
-router.post('/verify-account', signature_1.requireConvertorSignature, bankEndpoints.verifyAccount);
-router.get('/balance/:accountNumber', signature_1.requireConvertorSignature, bankEndpoints.balanceByAccountNumber);
+router.post('/connection-request', bankEndpoints.connectionRequest);
+router.post('/auth-challenge-response', bankEndpoints.authChallengeResponse);
+router.get('/account-balance', bankEndpoints.accountBalance);
+router.post('/debit-request', bankEndpoints.debitRequest);
+router.post('/credit-request', bankEndpoints.creditRequest);
+router.post('/transaction-status', bankEndpoints.transactionStatus);
+router.post('/reversal-request', bankEndpoints.reversalRequest);
+router.post('/verify-account', bankEndpoints.verifyAccount);
+router.get('/balance/:accountNumber', bankEndpoints.balanceByAccountNumber);
 exports.default = router;
 //# sourceMappingURL=bank.js.map
