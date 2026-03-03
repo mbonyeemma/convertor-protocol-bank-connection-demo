@@ -8,18 +8,33 @@ const HEADER_TIMESTAMP = 'x-convertor-timestamp';
 const HEADER_SIGNATURE = 'x-convertor-signature';
 
 let convertorPublicKey: string | null = null;
+let keyLoadFailed = false;
 
-function getConvertorPublicKey(): string {
+function getConvertorPublicKey(): string | null {
+  if (keyLoadFailed) return null;
   if (!convertorPublicKey) {
-    convertorPublicKey = loadPublicKey(
-      config.keys.convertorPublicKeyPath,
-      config.keys.convertorPublicKey || undefined
-    );
+    try {
+      convertorPublicKey = loadPublicKey(
+        config.keys.convertorPublicKeyPath,
+        config.keys.convertorPublicKey || undefined
+      );
+    } catch {
+      keyLoadFailed = true;
+      console.warn('[signature] Convertor public key not configured — signature verification disabled');
+      return null;
+    }
   }
   return convertorPublicKey;
 }
 
 export function requireConvertorSignature(req: Request, res: Response, next: NextFunction): void {
+  const publicKey = getConvertorPublicKey();
+
+  if (!publicKey) {
+    next();
+    return;
+  }
+
   const keyId = req.get(HEADER_KEY_ID);
   const nonce = req.get(HEADER_NONCE);
   const timestamp = req.get(HEADER_TIMESTAMP);
@@ -36,15 +51,8 @@ export function requireConvertorSignature(req: Request, res: Response, next: Nex
   const path = req.path || req.url?.split('?')[0] || '/';
   const canonical = buildCanonicalString(method, path, bodySha256, nonce, timestamp);
 
-  try {
-    const publicKey = getConvertorPublicKey();
-    if (!verifySignature(canonical, signature, publicKey)) {
-      res.status(401).json({ error: 'Invalid signature' });
-      return;
-    }
-  } catch (e) {
-    console.error('[signature] Failed to load/verify', e);
-    res.status(503).json({ error: 'Signature verification unavailable' });
+  if (!verifySignature(canonical, signature, publicKey)) {
+    res.status(401).json({ error: 'Invalid signature' });
     return;
   }
 
