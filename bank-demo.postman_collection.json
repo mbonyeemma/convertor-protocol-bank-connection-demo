@@ -1,0 +1,561 @@
+{
+  "info": {
+    "_postman_id": "bank-demo-api-2024",
+    "name": "Bank Demo API",
+    "description": "Complete API collection for Bank Demo - Convertor Protocol Bank Implementation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bank API (Convertor → Bank)",
+      "description": "These endpoints are called by Convertor Protocol. They require signed requests with Convertor's signature.",
+      "item": [
+        {
+          "name": "Connection Request",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/connection-request",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"user-uuid-here\",\n  \"account_reference\": \"ACC001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Convertor initiates user bank connection. Bank returns challenge type and metadata."
+          }
+        },
+        {
+          "name": "Verify Account",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/verify-account",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account_reference\": \"ACC001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Verify account number and return account holder name. Requires Convertor signature."
+          }
+        },
+        {
+          "name": "Auth Challenge Response",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/auth-challenge-response",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"user-uuid-here\",\n  \"challenge_response\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "User submits OTP. Bank returns scoped connection token."
+          }
+        },
+        {
+          "name": "Get Account Balance",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/account-balance",
+            "header": [
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/account-balance?connection_token_hash={{connection_token_hash}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "account-balance"],
+              "query": [
+                {
+                  "key": "connection_token_hash",
+                  "value": "{{connection_token_hash}}",
+                  "description": "SHA256 hash of the connection token"
+                }
+              ]
+            },
+            "description": "Retrieve user balance for transfer eligibility check. Requires balance-scoped token."
+          }
+        },
+        {
+          "name": "Debit Request (Lock Phase)",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/debit-request",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference_id\": \"REF-2024-001\",\n  \"amount\": {\n    \"value\": 1000.00,\n    \"currency\": \"UGX\"\n  },\n  \"connection_token_hash\": \"{{connection_token_hash}}\",\n  \"idempotency_key\": \"idemp-key-123\",\n  \"phase\": \"lock\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Lock funds from source account (first phase of debit)."
+          }
+        },
+        {
+          "name": "Debit Request (Debit Phase)",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/debit-request",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference_id\": \"REF-2024-001\",\n  \"lock_confirmation_id\": \"LOCK-REF-2024-001-1234567890\",\n  \"amount\": {\n    \"value\": 1000.00,\n    \"currency\": \"UGX\"\n  },\n  \"connection_token_hash\": \"{{connection_token_hash}}\",\n  \"idempotency_key\": \"idemp-key-123\",\n  \"phase\": \"debit\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Debit funds from source account (second phase, after lock)."
+          }
+        },
+        {
+          "name": "Credit Request",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/credit-request",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference_id\": \"REF-2024-001\",\n  \"amount\": {\n    \"value\": 1000.00,\n    \"currency\": \"UGX\"\n  },\n  \"beneficiary_reference\": \"ACC002\",\n  \"debit_proof_hash\": \"hash-of-debit-proof\",\n  \"idempotency_key\": \"idemp-key-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Credit funds into destination account."
+          }
+        },
+        {
+          "name": "Transaction Status",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/transaction-status",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference_id\": \"REF-2024-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Query current state of a transaction by Protocol Reference ID."
+          }
+        },
+        {
+          "name": "Reversal Request",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/reversal-request",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Convertor-Signature",
+                "value": "{{convertor_signature}}"
+              },
+              {
+                "key": "X-Convertor-Key-Id",
+                "value": "{{convertor_key_id}}"
+              },
+              {
+                "key": "X-Nonce",
+                "value": "{{nonce}}"
+              },
+              {
+                "key": "X-Timestamp",
+                "value": "{{timestamp}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference_id\": \"REF-2024-001\",\n  \"debit_proof\": {\n    \"amount\": 1000.00,\n    \"account_hash\": \"hash-of-account\",\n    \"timestamp\": 1234567890,\n    \"bank_signature\": \"bank-signature-here\"\n  },\n  \"idempotency_key\": \"idemp-key-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Reverse a debit. Used when credit cannot be confirmed."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin API",
+      "description": "Admin endpoints for managing accounts, transactions, and configuration. No authentication required (for demo purposes).",
+      "item": [
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/admin/accounts"
+          }
+        },
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/admin/accounts",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"emma\",\n  \"userName\": \"Emma Wilson\",\n  \"accountNumber\": \"ACC001\",\n  \"initialBalance\": 10000,\n  \"currency\": \"UGX\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Account Balance",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/admin/accounts/:accountId/balance",
+            "url": {
+              "raw": "{{BASE_URL}}/admin/accounts/:accountId/balance",
+              "host": ["{{BASE_URL}}"],
+              "path": ["admin", "accounts", ":accountId", "balance"],
+              "variable": [
+                {
+                  "key": "accountId",
+                  "value": "account-uuid-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/admin/transactions"
+          }
+        },
+        {
+          "name": "List Connection Tokens",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/admin/connection-tokens"
+          }
+        },
+        {
+          "name": "Get Config",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/admin/config"
+          }
+        },
+        {
+          "name": "Update Config",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/admin/config",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"bank_code\",\n  \"value\": \"DFC\",\n  \"description\": \"Bank code\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Keys",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/admin/config/keys",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankPrivateKey\": \"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\",\n  \"convertorPublicKey\": \"-----BEGIN PUBLIC KEY-----\\n...\\n-----END PUBLIC KEY-----\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Update bank private key and/or Convertor public key. Auto-registers bank with Convertor protocol when private key is saved."
+          }
+        },
+        {
+          "name": "Get Registration Status",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/admin/config/registration"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "convertor_signature",
+      "value": "",
+      "type": "string",
+      "description": "Convertor's signature for bank API requests"
+    },
+    {
+      "key": "convertor_key_id",
+      "value": "",
+      "type": "string",
+      "description": "Convertor's key ID"
+    },
+    {
+      "key": "nonce",
+      "value": "",
+      "type": "string",
+      "description": "Nonce for request signing"
+    },
+    {
+      "key": "timestamp",
+      "value": "",
+      "type": "string",
+      "description": "Timestamp for request signing"
+    },
+    {
+      "key": "connection_token_hash",
+      "value": "",
+      "type": "string",
+      "description": "SHA256 hash of connection token"
+    }
+  ]
+}

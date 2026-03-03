@@ -48,9 +48,24 @@ const config_1 = require("./config");
 application_1.default.use('/api', bank_1.default);
 application_1.default.use('/admin', admin_1.default);
 application_1.default.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
-application_1.default.get('/health', (_req, res) => {
+application_1.default.get('/health', async (_req, res) => {
     const bankName = config_1.config.getBankName();
-    res.json({ status: 'ok', bank: bankName });
+    const bankCode = config_1.config.getBankCode();
+    let dbHealthy = false;
+    try {
+        await data_source_1.AppDataSource.query('SELECT 1');
+        dbHealthy = true;
+    }
+    catch (_) { }
+    const status = dbHealthy ? 'ok' : 'degraded';
+    res.status(dbHealthy ? 200 : 503).json({
+        status,
+        bank: bankName,
+        bankCode,
+        database: dbHealthy ? 'connected' : 'disconnected',
+        uptime: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString(),
+    });
 });
 const port = config_1.config.port;
 async function start() {

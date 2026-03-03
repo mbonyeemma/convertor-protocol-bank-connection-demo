@@ -7,6 +7,8 @@ exports.debitRequest = debitRequest;
 exports.creditRequest = creditRequest;
 exports.transactionStatus = transactionStatus;
 exports.reversalRequest = reversalRequest;
+exports.balanceByAccountNumber = balanceByAccountNumber;
+exports.verifyAccount = verifyAccount;
 const data_source_1 = require("../data-source");
 const Account_1 = require("../entities/Account");
 const ConnectionToken_1 = require("../entities/ConnectionToken");
@@ -295,6 +297,58 @@ async function reversalRequest(req, res) {
     catch (e) {
         console.error('[reversalRequest]', e);
         res.status(500).json({ error: 'Failed to process reversal' });
+    }
+}
+/** GET /balance/:accountNumber - Return balance by account number */
+async function balanceByAccountNumber(req, res) {
+    try {
+        const { accountNumber } = req.params;
+        const account = await accountRepo().findOne({ where: { accountNumber } });
+        if (!account) {
+            res.status(404).json({ error: 'Account not found' });
+            return;
+        }
+        res.json({
+            account_number: account.accountNumber,
+            account_holder_name: account.userName,
+            balance: Number(account.balance),
+            currency: account.currency,
+        });
+    }
+    catch (e) {
+        console.error('[balanceByAccountNumber]', e);
+        res.status(500).json({ error: 'Failed to get balance' });
+    }
+}
+/** POST /verify-account - Verify account number and return account holder name */
+async function verifyAccount(req, res) {
+    try {
+        const { account_reference } = req.body;
+        if (!account_reference) {
+            res.status(400).json({ error: 'account_reference is required' });
+            return;
+        }
+        const account = await accountRepo().findOne({ where: { accountNumber: account_reference } });
+        if (!account) {
+            res.status(404).json({ error: 'Account not found' });
+            return;
+        }
+        // Sign response with bank's private key
+        const response = {
+            account_holder_name: account.userName,
+            account_number: account.accountNumber,
+            verified: true,
+        };
+        const privateKey = getBankPrivateKey();
+        const bankSignature = (0, crypto_1.sign)(JSON.stringify(response), privateKey);
+        res.json({
+            ...response,
+            bank_signature: bankSignature,
+        });
+    }
+    catch (e) {
+        console.error('[verifyAccount]', e);
+        res.status(500).json({ error: 'Failed to verify account' });
     }
 }
 //# sourceMappingURL=bankEndpoints.js.map

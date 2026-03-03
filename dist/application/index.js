@@ -5,7 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
-app.use(express_1.default.json());
+app.use(express_1.default.json({
+    verify: (req, _res, buf) => {
+        req.rawBody = buf;
+    },
+}));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((err, req, res, _next) => {
     console.error(err.stack);

@@ -7,4 +7,6 @@ export declare function getAccountBalance(req: Request, res: Response): Promise<
 export declare function getConfig(_req: Request, res: Response): Promise<void>;
 export declare function updateConfig(req: Request, res: Response): Promise<void>;
 export declare function updateKeys(req: Request, res: Response): Promise<void>;
+export declare function validateAccount(req: Request, res: Response): Promise<void>;
+export declare function depositToAccount(req: Request, res: Response): Promise<void>;
 export declare function getRegistrationStatus(req: Request, res: Response): Promise<void>;

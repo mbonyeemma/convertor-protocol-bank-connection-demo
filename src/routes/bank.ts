@@ -12,5 +12,6 @@ router.post('/credit-request', requireConvertorSignature, bankEndpoints.creditRe
 router.post('/transaction-status', requireConvertorSignature, bankEndpoints.transactionStatus);
 router.post('/reversal-request', requireConvertorSignature, bankEndpoints.reversalRequest);
 router.post('/verify-account', requireConvertorSignature, bankEndpoints.verifyAccount);
+router.get('/balance/:accountNumber', requireConvertorSignature, bankEndpoints.balanceByAccountNumber);
 
 export default router;

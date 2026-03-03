@@ -38,7 +38,9 @@ const adminController = __importStar(require("../controllers/adminController"));
 const router = (0, express_1.Router)();
 router.get('/accounts', adminController.listAccounts);
 router.post('/accounts', adminController.createAccount);
+router.get('/accounts/validate/:accountNumber', adminController.validateAccount);
 router.get('/accounts/:accountId/balance', adminController.getAccountBalance);
+router.post('/accounts/:accountNumber/deposit', adminController.depositToAccount);
 router.get('/transactions', adminController.listTransactions);
 router.get('/connection-tokens', adminController.listConnectionTokens);
 // Config endpoints

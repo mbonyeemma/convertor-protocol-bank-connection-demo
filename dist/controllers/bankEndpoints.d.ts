@@ -13,3 +13,7 @@ export declare function creditRequest(req: Request, res: Response): Promise<void
 export declare function transactionStatus(req: Request, res: Response): Promise<void>;
 /** POST /reversal-request - Reverse a debit */
 export declare function reversalRequest(req: Request, res: Response): Promise<void>;
+/** GET /balance/:accountNumber - Return balance by account number */
+export declare function balanceByAccountNumber(req: Request, res: Response): Promise<void>;
+/** POST /verify-account - Verify account number and return account holder name */
+export declare function verifyAccount(req: Request, res: Response): Promise<void>;

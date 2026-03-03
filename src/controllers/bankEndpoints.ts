@@ -304,6 +304,29 @@ export async function reversalRequest(req: Request, res: Response): Promise<void
   }
 }
 
+/** GET /balance/:accountNumber - Return balance by account number */
+export async function balanceByAccountNumber(req: Request, res: Response): Promise<void> {
+  try {
+    const { accountNumber } = req.params;
+
+    const account = await accountRepo().findOne({ where: { accountNumber } });
+    if (!account) {
+      res.status(404).json({ error: 'Account not found' });
+      return;
+    }
+
+    res.json({
+      account_number: account.accountNumber,
+      account_holder_name: account.userName,
+      balance: Number(account.balance),
+      currency: account.currency,
+    });
+  } catch (e) {
+    console.error('[balanceByAccountNumber]', e);
+    res.status(500).json({ error: 'Failed to get balance' });
+  }
+}
+
 /** POST /verify-account - Verify account number and return account holder name */
 export async function verifyAccount(req: Request, res: Response): Promise<void> {
   try {
