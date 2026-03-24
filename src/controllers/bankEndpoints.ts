@@ -337,6 +337,7 @@ export async function verifyAccount(req: Request, res: Response): Promise<void> 
     res.json({
       account_holder_name: account.userName,
       account_number: account.accountNumber,
+      phone_number: account.phoneNumber || null,
       verified: true,
     });
   } catch (e) {
