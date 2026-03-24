@@ -903,6 +903,10 @@
                 <input type="text" name="accountNumber" placeholder="e.g. ACC001" required>
               </div>
               <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" name="phoneNumber" placeholder="e.g. +256700123456" required>
+              </div>
+              <div class="form-group">
                 <label>Initial Balance</label>
                 <input type="number" name="initialBalance" placeholder="0" value="1000000">
               </div>
@@ -937,6 +941,7 @@
                 <th>User ID</th>
                 <th>Name</th>
                 <th>Account Number</th>
+                <th>Phone</th>
                 <th>Balance</th>
                 <th>Currency</th>
                 <th>Created</th>
@@ -1219,7 +1224,7 @@
         const accounts = await fetch(`${API_BASE}/admin/accounts`).then(r => r.json());
         const tbody = document.getElementById('accountsBody');
         if (accounts.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No accounts found</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No accounts found</td></tr>';
           return;
         }
         tbody.innerHTML = accounts.map(a => `
@@ -1227,6 +1232,7 @@
             <td>${a.userId}</td>
             <td>${a.userName}</td>
             <td><strong>${a.accountNumber}</strong></td>
+            <td>${a.phoneNumber || '-'}</td>
             <td>${Number(a.balance).toLocaleString()}</td>
             <td>${a.currency}</td>
             <td>${new Date(a.createdAt).toLocaleDateString()}</td>

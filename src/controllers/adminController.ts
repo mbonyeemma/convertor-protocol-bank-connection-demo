@@ -19,6 +19,7 @@ export async function listAccounts(_req: Request, res: Response): Promise<void> 
       userId: a.userId,
       userName: a.userName,
       accountNumber: a.accountNumber,
+      phoneNumber: a.phoneNumber ?? null,
       balance: Number(a.balance),
       currency: a.currency,
       createdAt: a.createdAt,
@@ -29,11 +30,22 @@ export async function listAccounts(_req: Request, res: Response): Promise<void> 
   }
 }
 
+function normalizePhoneDigits(raw: unknown): string | null {
+  if (raw == null || raw === '') return null;
+  const d = String(raw).replace(/\D/g, '');
+  return d.length >= 9 ? d : null;
+}
+
 export async function createAccount(req: Request, res: Response): Promise<void> {
   try {
-    const { userId, userName, accountNumber, initialBalance = 0, currency = 'UGX' } = req.body;
-    if (!userId || !userName || !accountNumber) {
-      res.status(400).json({ error: 'userId, userName, accountNumber required' });
+    const { userId, userName, accountNumber, phoneNumber, initialBalance = 0, currency = 'UGX' } = req.body;
+    if (!userId || !userName || !accountNumber || !phoneNumber) {
+      res.status(400).json({ error: 'userId, userName, accountNumber, phoneNumber required' });
+      return;
+    }
+    const phoneNorm = normalizePhoneDigits(phoneNumber);
+    if (!phoneNorm) {
+      res.status(400).json({ error: 'phoneNumber must contain at least 9 digits' });
       return;
     }
     const existing = await accountRepo().findOne({ where: { accountNumber } });
@@ -41,10 +53,16 @@ export async function createAccount(req: Request, res: Response): Promise<void> 
       res.status(409).json({ error: 'Account number already exists' });
       return;
     }
+    const phoneTaken = await accountRepo().findOne({ where: { phoneNumber: phoneNorm } });
+    if (phoneTaken) {
+      res.status(409).json({ error: 'Phone number already linked to an account' });
+      return;
+    }
     const account = accountRepo().create({
       userId: String(userId),
       userName: String(userName),
       accountNumber: String(accountNumber),
+      phoneNumber: phoneNorm,
       balance: String(initialBalance),
       currency: String(currency),
     });
@@ -54,6 +72,7 @@ export async function createAccount(req: Request, res: Response): Promise<void> 
       userId: account.userId,
       userName: account.userName,
       accountNumber: account.accountNumber,
+      phoneNumber: account.phoneNumber,
       balance: Number(account.balance),
       currency: account.currency,
     });

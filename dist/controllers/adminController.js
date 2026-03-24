@@ -65,6 +65,7 @@ async function listAccounts(_req, res) {
             userId: a.userId,
             userName: a.userName,
             accountNumber: a.accountNumber,
+            phoneNumber: a.phoneNumber ?? null,
             balance: Number(a.balance),
             currency: a.currency,
             createdAt: a.createdAt,
@@ -75,9 +76,15 @@ async function listAccounts(_req, res) {
         res.status(500).json({ error: 'Failed to list accounts' });
     }
 }
+function normalizePhoneDigits(raw) {
+    if (raw == null || raw === '')
+        return null;
+    const d = String(raw).replace(/\D/g, '');
+    return d.length >= 9 ? d : null;
+}
 async function createAccount(req, res) {
     try {
-        const { userId, userName, accountNumber, initialBalance = 0, currency = 'UGX' } = req.body;
+        const { userId, userName, accountNumber, phoneNumber, initialBalance = 0, currency = 'UGX' } = req.body;
         if (!userId || !userName || !accountNumber) {
             res.status(400).json({ error: 'userId, userName, accountNumber required' });
             return;
@@ -87,10 +94,19 @@ async function createAccount(req, res) {
             res.status(409).json({ error: 'Account number already exists' });
             return;
         }
+        const phoneNorm = normalizePhoneDigits(phoneNumber);
+        if (phoneNorm) {
+            const phoneTaken = await accountRepo().findOne({ where: { phoneNumber: phoneNorm } });
+            if (phoneTaken) {
+                res.status(409).json({ error: 'Phone number already linked to an account' });
+                return;
+            }
+        }
         const account = accountRepo().create({
             userId: String(userId),
             userName: String(userName),
             accountNumber: String(accountNumber),
+            phoneNumber: phoneNorm,
             balance: String(initialBalance),
             currency: String(currency),
         });
@@ -100,6 +116,7 @@ async function createAccount(req, res) {
             userId: account.userId,
             userName: account.userName,
             accountNumber: account.accountNumber,
+            phoneNumber: account.phoneNumber,
             balance: Number(account.balance),
             currency: account.currency,
         });

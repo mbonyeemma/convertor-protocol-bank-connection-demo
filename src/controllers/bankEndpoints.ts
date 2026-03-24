@@ -10,6 +10,10 @@ const accountRepo = () => AppDataSource.getRepository(Account);
 const tokenRepo = () => AppDataSource.getRepository(ConnectionToken);
 const txRepo = () => AppDataSource.getRepository(BankTransaction);
 
+function normalizePhoneDigits(raw: string): string {
+  return raw.replace(/\D/g, '');
+}
+
 /** POST /connection-request - Convertor initiates user bank connection */
 export async function connectionRequest(req: Request, res: Response): Promise<void> {
   try {
@@ -274,20 +278,35 @@ export async function balanceByAccountNumber(req: Request, res: Response): Promi
   }
 }
 
-/** POST /verify-account - Verify account number and return account holder name */
+/** POST /verify-account - Resolve by account_reference or phone_number (federated lookup) */
 export async function verifyAccount(req: Request, res: Response): Promise<void> {
   try {
-    const { account_reference } = req.body;
-    
-    if (!account_reference) {
-      res.status(400).json({ error: 'account_reference is required' });
-      return;
-    }
+    const { account_reference, phone_number } = req.body as {
+      account_reference?: string;
+      phone_number?: string;
+    };
 
-    const account = await accountRepo().findOne({ where: { accountNumber: account_reference } });
-    
-    if (!account) {
-      res.status(404).json({ error: 'Account not found' });
+    let account: Account | null = null;
+
+    if (phone_number != null && String(phone_number).trim() !== '') {
+      const digits = normalizePhoneDigits(String(phone_number));
+      if (digits.length < 9) {
+        res.status(400).json({ error: 'Invalid phone number' });
+        return;
+      }
+      account = await accountRepo().findOne({ where: { phoneNumber: digits } });
+      if (!account) {
+        res.status(404).json({ error: 'No account found for this phone number at this bank' });
+        return;
+      }
+    } else if (account_reference != null && String(account_reference).trim() !== '') {
+      account = await accountRepo().findOne({ where: { accountNumber: account_reference } });
+      if (!account) {
+        res.status(404).json({ error: 'Account not found' });
+        return;
+      }
+    } else {
+      res.status(400).json({ error: 'account_reference or phone_number is required' });
       return;
     }
 

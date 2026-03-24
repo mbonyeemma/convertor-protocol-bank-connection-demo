@@ -20,6 +20,10 @@ export class Account {
   @Column({ length: 64, unique: true })
   accountNumber!: string;
 
+  /** E.164-style digits only (e.g. 256700123456) for phone-to-account resolution */
+  @Column({ length: 20, nullable: true, unique: true })
+  phoneNumber!: string | null;
+
   @Column({ type: 'bigint', default: 0 })
   balance!: string;
 

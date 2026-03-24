@@ -16,6 +16,8 @@ let Account = class Account {
     userId;
     userName;
     accountNumber;
+    /** E.164-style digits only (e.g. 256700123456) for phone-to-account resolution */
+    phoneNumber;
     balance;
     currency;
     createdAt;
@@ -38,6 +40,10 @@ __decorate([
     (0, typeorm_1.Column)({ length: 64, unique: true }),
     __metadata("design:type", String)
 ], Account.prototype, "accountNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 20, nullable: true, unique: true }),
+    __metadata("design:type", Object)
+], Account.prototype, "phoneNumber", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'bigint', default: 0 }),
     __metadata("design:type", String)

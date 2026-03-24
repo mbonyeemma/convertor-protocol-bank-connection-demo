@@ -15,5 +15,5 @@ export declare function transactionStatus(req: Request, res: Response): Promise<
 export declare function reversalRequest(req: Request, res: Response): Promise<void>;
 /** GET /balance/:accountNumber - Return balance by account number */
 export declare function balanceByAccountNumber(req: Request, res: Response): Promise<void>;
-/** POST /verify-account - Verify account number and return account holder name */
+/** POST /verify-account - Resolve by account_reference or phone_number (federated lookup) */
 export declare function verifyAccount(req: Request, res: Response): Promise<void>;
