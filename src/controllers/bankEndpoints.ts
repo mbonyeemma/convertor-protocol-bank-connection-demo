@@ -11,7 +11,11 @@ const tokenRepo = () => AppDataSource.getRepository(ConnectionToken);
 const txRepo = () => AppDataSource.getRepository(BankTransaction);
 
 function normalizePhoneDigits(raw: string): string {
-  return raw.replace(/\D/g, '');
+  const d = raw.replace(/\D/g, '');
+  if (d.startsWith('256') && d.length === 12) return d;
+  if (d.startsWith('0') && d.length === 10) return `256${d.slice(1)}`;
+  if (d.length === 9) return `256${d}`;
+  return d;
 }
 
 /** POST /connection-request - Convertor initiates user bank connection */
