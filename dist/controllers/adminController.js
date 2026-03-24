@@ -82,6 +82,9 @@ function normalizePhoneDigits(raw) {
     const d = String(raw).replace(/\D/g, '');
     return d.length >= 9 ? d : null;
 }
+function isDuplicateEntryError(err) {
+    return typeof err === 'object' && err !== null && err.code === 'ER_DUP_ENTRY';
+}
 async function createAccount(req, res) {
     try {
         const { userId, userName, accountNumber, phoneNumber, initialBalance = 0, currency = 'UGX' } = req.body;
@@ -89,12 +92,17 @@ async function createAccount(req, res) {
             res.status(400).json({ error: 'userId, userName, accountNumber, phoneNumber required' });
             return;
         }
+        const accountNumberNorm = String(accountNumber).trim();
+        if (!accountNumberNorm) {
+            res.status(400).json({ error: 'accountNumber is required' });
+            return;
+        }
         const phoneNorm = normalizePhoneDigits(phoneNumber);
         if (!phoneNorm) {
             res.status(400).json({ error: 'phoneNumber must contain at least 9 digits' });
             return;
         }
-        const existing = await accountRepo().findOne({ where: { accountNumber } });
+        const existing = await accountRepo().findOne({ where: { accountNumber: accountNumberNorm } });
         if (existing) {
             res.status(409).json({ error: 'Account number already exists' });
             return;
@@ -107,7 +115,7 @@ async function createAccount(req, res) {
         const account = accountRepo().create({
             userId: String(userId),
             userName: String(userName),
-            accountNumber: String(accountNumber),
+            accountNumber: accountNumberNorm,
             phoneNumber: phoneNorm,
             balance: String(initialBalance),
             currency: String(currency),
@@ -124,6 +132,19 @@ async function createAccount(req, res) {
         });
     }
     catch (e) {
+        if (isDuplicateEntryError(e)) {
+            const msg = e.sqlMessage || '';
+            if (msg.includes('account')) {
+                res.status(409).json({ error: 'Account number already exists' });
+                return;
+            }
+            if (msg.includes('phone')) {
+                res.status(409).json({ error: 'Phone number already linked to an account' });
+                return;
+            }
+            res.status(409).json({ error: 'Duplicate account details. Use unique phone/account number.' });
+            return;
+        }
         console.error('[admin.createAccount]', e);
         res.status(500).json({ error: 'Failed to create account' });
     }
