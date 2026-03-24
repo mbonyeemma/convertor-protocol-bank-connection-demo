@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DFC Bank - Admin Portal</title>
+  <title>Bank Admin Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -777,7 +777,7 @@
     <div class="login-card">
       <div class="login-logo">
         <div class="logo-icon">🏦</div>
-        <h1>DFC Bank</h1>
+        <h1 id="loginBankName">Bank</h1>
       </div>
       <p class="subtitle">Admin Portal</p>
       <form id="loginForm">
@@ -801,7 +801,7 @@
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <div class="logo-icon">🏦</div>
-          <h1>DFC Bank</h1>
+          <h1 id="sidebarBankName">Bank</h1>
         </div>
         <p class="sidebar-subtitle">Admin Portal</p>
       </div>
@@ -1110,6 +1110,20 @@
   <script>
     const API_BASE = window.location.origin;
     let isAuthenticated = localStorage.getItem('dfc_bank_auth') === 'true';
+
+    async function applyBankBranding() {
+      try {
+        const config = await fetch(`${API_BASE}/admin/config`).then(r => r.json());
+        const bankName = (config && config.bank_name) ? String(config.bank_name) : 'Bank';
+        const loginBankName = document.getElementById('loginBankName');
+        const sidebarBankName = document.getElementById('sidebarBankName');
+        if (loginBankName) loginBankName.textContent = bankName;
+        if (sidebarBankName) sidebarBankName.textContent = bankName;
+        document.title = `${bankName} - Admin Portal`;
+      } catch (e) {
+        console.error('Failed to load bank branding', e);
+      }
+    }
 
     document.getElementById('loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1570,6 +1584,8 @@
         submitBtn.textContent = originalText;
       }
     });
+
+    void applyBankBranding();
 
     if (isAuthenticated) {
       showApp();
