@@ -21,7 +21,7 @@ export class Account {
   accountNumber!: string;
 
   /** E.164-style digits only (e.g. 256700123456) for phone-to-account resolution */
-  @Column({ length: 20, nullable: true, unique: true })
+  @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
   phoneNumber!: string | null;
 
   @Column({ type: 'bigint', default: 0 })

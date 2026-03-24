@@ -85,8 +85,13 @@ function normalizePhoneDigits(raw) {
 async function createAccount(req, res) {
     try {
         const { userId, userName, accountNumber, phoneNumber, initialBalance = 0, currency = 'UGX' } = req.body;
-        if (!userId || !userName || !accountNumber) {
-            res.status(400).json({ error: 'userId, userName, accountNumber required' });
+        if (!userId || !userName || !accountNumber || !phoneNumber) {
+            res.status(400).json({ error: 'userId, userName, accountNumber, phoneNumber required' });
+            return;
+        }
+        const phoneNorm = normalizePhoneDigits(phoneNumber);
+        if (!phoneNorm) {
+            res.status(400).json({ error: 'phoneNumber must contain at least 9 digits' });
             return;
         }
         const existing = await accountRepo().findOne({ where: { accountNumber } });
@@ -94,13 +99,10 @@ async function createAccount(req, res) {
             res.status(409).json({ error: 'Account number already exists' });
             return;
         }
-        const phoneNorm = normalizePhoneDigits(phoneNumber);
-        if (phoneNorm) {
-            const phoneTaken = await accountRepo().findOne({ where: { phoneNumber: phoneNorm } });
-            if (phoneTaken) {
-                res.status(409).json({ error: 'Phone number already linked to an account' });
-                return;
-            }
+        const phoneTaken = await accountRepo().findOne({ where: { phoneNumber: phoneNorm } });
+        if (phoneTaken) {
+            res.status(409).json({ error: 'Phone number already linked to an account' });
+            return;
         }
         const account = accountRepo().create({
             userId: String(userId),
